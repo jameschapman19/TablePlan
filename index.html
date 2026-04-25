@@ -255,10 +255,15 @@
     .canvas { overflow: visible; padding: 0; background: #fff; }
     .tables-stack { display: flex; flex-direction: column; gap: 10px; }
 
+    /* Stack as block so break-inside works reliably */
+    .tables-stack { display: block !important; }
+
     /* Each table stays on one page — never splits */
     .table-card {
-      break-inside: avoid; page-break-inside: avoid;
+      break-inside: avoid !important; page-break-inside: avoid !important;
+      overflow: visible !important; /* overflow:hidden blocks break avoidance */
       box-shadow: none; border: 1px solid #c9a96e; border-radius: 8px;
+      margin-bottom: 10px;
     }
 
     /* Seat rows: no scrollbar clip in print */
