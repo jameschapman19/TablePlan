@@ -513,7 +513,23 @@ function freshState() {
   return { layout: 'A', allGuests: [], seating: { A: {}, B: {} }, tableNames: { A: {}, B: {} }, groups: [], guestGroups: {} };
 }
 
-const GROUP_COLORS = ['#6b8cae','#c47fa0','#7aaa7a','#a09878','#9b7fb6','#6aacaa','#c98a50','#b0896a','#7b9e87','#c47f4f','#8b7bb5','#5f9ea0','#b56b6b','#7a8fa6','#c4a44f'];
+const GROUP_COLORS = [
+  '#d64545', // red
+  '#d4732a', // orange
+  '#c9a826', // amber
+  '#6aab2e', // lime
+  '#2e9e56', // green
+  '#2a9e8a', // teal
+  '#2a7fc9', // sky
+  '#4455cc', // blue
+  '#7c3fc9', // violet
+  '#b83ab0', // magenta
+  '#cc3d72', // rose
+  '#9e5f2a', // brown
+  '#4f8c6a', // sage
+  '#7a8c3a', // olive
+  '#3a6e8c', // slate
+];
 
 let dragGuest = null;
 let dragSource = null;
@@ -818,7 +834,7 @@ function renderGuestList() {
     chip.draggable = true;
 
     const group = getGroup(name);
-    const iniColor = group ? group.color : (assigned ? '#d9cfc2' : '#c9a96e');
+    const iniColor = group ? group.color : '#b8b0a8';
 
     const nameSpan = `<span style="flex:1;word-break:break-word">${name}</span>`;
     const badge = assigned ? `<span class="table-badge">${assignment.tableName}</span>` : '';
