@@ -513,7 +513,7 @@ function freshState() {
   return { layout: 'A', allGuests: [], seating: { A: {}, B: {} }, tableNames: { A: {}, B: {} }, groups: [], guestGroups: {} };
 }
 
-const GROUP_COLORS = ['#6b8cae','#c47fa0','#7aaa7a','#a09878','#9b7fb6','#6aacaa','#c98a50','#b0896a'];
+const GROUP_COLORS = ['#6b8cae','#c47fa0','#7aaa7a','#a09878','#9b7fb6','#6aacaa','#c98a50','#b0896a','#7b9e87','#c47f4f','#8b7bb5','#5f9ea0','#b56b6b','#7a8fa6','#c4a44f'];
 
 let dragGuest = null;
 let dragSource = null;
@@ -598,7 +598,7 @@ function setGuestGroup(name, groupId) {
   save(); render();
 }
 function addGroup() {
-  if (state.groups.length >= 8) return;
+  if (state.groups.length >= 15) return;
   const id = 'g' + Date.now();
   const color = GROUP_COLORS[state.groups.length % GROUP_COLORS.length];
   state.groups.push({ id, name: 'Group ' + (state.groups.length + 1), color });
@@ -775,7 +775,7 @@ function renderGroupLegend() {
     legend.appendChild(pill);
   });
 
-  if (state.groups.length < 8) {
+  if (state.groups.length < 15) {
     const addBtn = document.createElement('span');
     addBtn.className = 'group-add-btn'; addBtn.textContent = '+'; addBtn.title = 'Add group';
     addBtn.addEventListener('click', addGroup);
