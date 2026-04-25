@@ -992,12 +992,16 @@ function openGroupPicker(name, anchorEl) {
   });
 
   const rect = anchorEl.getBoundingClientRect();
+  picker.style.top = '-9999px'; picker.style.left = '-9999px';
   picker.style.display = 'block';
   const pw = picker.offsetWidth;
+  const ph = picker.offsetHeight;
   let left = rect.left;
   if (left + pw > window.innerWidth - 8) left = window.innerWidth - pw - 8;
+  const spaceBelow = window.innerHeight - rect.bottom - 8;
+  const top = spaceBelow >= ph ? rect.bottom + 4 : rect.top - ph - 4;
   picker.style.left = left + 'px';
-  picker.style.top = (rect.bottom + 4) + 'px';
+  picker.style.top = top + 'px';
 }
 function closeGroupPicker() {
   document.getElementById('group-picker').style.display = 'none';
