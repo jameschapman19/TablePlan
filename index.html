@@ -4,100 +4,171 @@
 <meta charset="UTF-8">
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: var(--font-sans, sans-serif); color: var(--color-text-primary); background: transparent; min-height: 600px; }
+  body { font-family: var(--font-sans, sans-serif); color: #222; background: #f0ede8; min-height: 600px; }
 
-  /* Password overlay */
+  /* ── Auth overlay ─────────────────────────────────────────────────────── */
   #auth-overlay {
     position: fixed; inset: 0; z-index: 9999;
     background: rgba(0,0,0,0.55); display: flex; align-items: center; justify-content: center;
   }
   #auth-box {
-    background: #fff; border-radius: 12px; padding: 32px 28px; width: 320px;
-    box-shadow: 0 8px 40px rgba(0,0,0,0.18); text-align: center;
+    background: #fff; border-radius: 14px; padding: 36px 32px; width: 320px;
+    box-shadow: 0 8px 40px rgba(0,0,0,0.22); text-align: center;
   }
-  #auth-box h2 { font-size: 18px; font-weight: 600; margin-bottom: 6px; color: #111; }
-  #auth-box p { font-size: 13px; color: #666; margin-bottom: 20px; }
+  #auth-box h2 { font-size: 19px; font-weight: 600; margin-bottom: 6px; color: #1a1a1a; }
+  #auth-box p { font-size: 13px; color: #777; margin-bottom: 22px; }
   #auth-box input {
-    width: 100%; padding: 10px 12px; font-size: 15px; border: 1px solid #ddd;
-    border-radius: 8px; margin-bottom: 12px; letter-spacing: 2px; text-align: center;
+    width: 100%; padding: 10px 14px; font-size: 15px;
+    border: 1.5px solid #ddd; border-radius: 8px; margin-bottom: 12px;
+    letter-spacing: 3px; text-align: center; color: #222;
   }
   #auth-box input:focus { outline: none; border-color: #8b6c42; }
   #auth-box button {
-    width: 100%; padding: 10px; background: #8b6c42; color: #fff;
+    width: 100%; padding: 11px; background: #8b6c42; color: #fff;
     border: none; border-radius: 8px; font-size: 14px; cursor: pointer; font-weight: 500;
   }
   #auth-box button:hover { background: #7a5c35; }
-  #auth-error { font-size: 12px; color: #c0392b; margin-top: 8px; display: none; }
+  #auth-error { font-size: 12px; color: #c0392b; margin-top: 10px; display: none; }
 
-  .app { display: flex; flex-direction: column; gap: 0; height: 100%; min-height: 700px; }
+  /* ── App shell ────────────────────────────────────────────────────────── */
+  .app { display: flex; flex-direction: column; height: 100vh; }
 
-  .toolbar { display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-bottom: 0.5px solid var(--color-border-tertiary); flex-wrap: wrap; }
-  .toolbar-title { font-size: 15px; font-weight: 500; margin-right: auto; }
-
-  .add-guest-row { display: flex; gap: 8px; flex: 1; min-width: 220px; }
-  .add-guest-row input { flex: 1; min-width: 0; font-size: 13px; padding: 6px 10px; border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-md); background: var(--color-background-primary); color: var(--color-text-primary); }
-  .add-guest-row input:focus { outline: none; border-color: var(--color-border-primary); }
-  .btn { font-size: 12px; padding: 6px 12px; border: 0.5px solid var(--color-border-secondary); border-radius: var(--border-radius-md); background: transparent; color: var(--color-text-primary); cursor: pointer; white-space: nowrap; }
-  .btn:hover { background: var(--color-background-secondary); }
-  .btn:active { transform: scale(0.98); }
-  .btn-primary { background: var(--color-background-info); border-color: var(--color-border-info); color: var(--color-text-info); }
-  .btn-primary:hover { opacity: 0.85; }
-
-  .layout-toggle { display: flex; gap: 4px; }
-  .layout-btn { font-size: 11px; padding: 5px 10px; border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-md); background: transparent; color: var(--color-text-secondary); cursor: pointer; }
-  .layout-btn.active { background: var(--color-background-secondary); color: var(--color-text-primary); border-color: var(--color-border-secondary); font-weight: 500; }
-
-  /* Sync status indicator */
-  #sync-status {
-    font-size: 11px; padding: 3px 8px; border-radius: 12px;
-    background: #eee; color: #666; transition: all 0.3s;
+  .toolbar {
+    display: flex; align-items: center; gap: 10px; padding: 10px 16px;
+    background: #fff; border-bottom: 1px solid #ddd; flex-wrap: wrap;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.06);
   }
-  #sync-status.synced { background: #d4edda; color: #155724; }
-  #sync-status.saving { background: #fff3cd; color: #856404; }
-  #sync-status.error { background: #f8d7da; color: #721c24; }
+  .toolbar-title { font-size: 15px; font-weight: 600; margin-right: auto; color: #3a2c1e; letter-spacing: 0.3px; }
+  .layout-toggle { display: flex; gap: 4px; }
+  .layout-btn {
+    font-size: 11px; padding: 5px 10px; border: 1px solid #ccc; border-radius: 20px;
+    background: transparent; color: #666; cursor: pointer;
+  }
+  .layout-btn.active { background: #3a2c1e; color: #fff; border-color: #3a2c1e; font-weight: 500; }
+  .btn {
+    font-size: 12px; padding: 6px 12px; border: 1px solid #ccc; border-radius: 6px;
+    background: #fff; color: #444; cursor: pointer; white-space: nowrap;
+  }
+  .btn:hover { background: #f5f5f5; }
+  #sync-status {
+    font-size: 11px; padding: 3px 9px; border-radius: 20px;
+    background: #eee; color: #777; transition: all 0.3s;
+  }
+  #sync-status.synced { background: #d4edda; color: #1a5c2e; }
+  #sync-status.saving { background: #fff3cd; color: #7a5c00; }
+  #sync-status.error  { background: #f8d7da; color: #721c24; }
 
   .main { display: flex; flex: 1; min-height: 0; overflow: hidden; }
 
-  .sidebar { width: 220px; min-width: 180px; border-right: 0.5px solid var(--color-border-tertiary); display: flex; flex-direction: column; overflow: hidden; }
-  .sidebar-header { padding: 10px 14px; font-size: 12px; color: var(--color-text-secondary); border-bottom: 0.5px solid var(--color-border-tertiary); display: flex; justify-content: space-between; align-items: center; }
+  /* ── Sidebar ──────────────────────────────────────────────────────────── */
+  .sidebar {
+    width: 210px; min-width: 170px; background: #fff;
+    border-right: 1px solid #ddd; display: flex; flex-direction: column; overflow: hidden;
+  }
+  .sidebar-header {
+    padding: 10px 14px; font-size: 12px; font-weight: 500; color: #555;
+    border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center;
+  }
   .guest-list { flex: 1; overflow-y: auto; padding: 6px; }
-  .guest-chip { display: flex; align-items: center; gap: 6px; padding: 5px 8px; border-radius: var(--border-radius-md); margin-bottom: 3px; font-size: 13px; cursor: grab; border: 0.5px solid var(--color-border-tertiary); background: var(--color-background-primary); user-select: none; transition: background 0.1s; }
-  .guest-chip:hover { background: var(--color-background-secondary); }
-  .guest-chip.dragging { opacity: 0.4; }
-  .guest-chip .remove-btn { margin-left: auto; font-size: 11px; color: var(--color-text-tertiary); cursor: pointer; padding: 0 2px; }
-  .guest-chip .remove-btn:hover { color: var(--color-text-danger); }
-  .guest-initial { width: 22px; height: 22px; border-radius: 50%; background: var(--color-background-info); color: var(--color-text-info); font-size: 10px; font-weight: 500; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .guest-chip {
+    display: flex; align-items: center; gap: 6px; padding: 5px 8px; border-radius: 7px;
+    margin-bottom: 3px; font-size: 13px; cursor: grab;
+    border: 1px solid #e8e8e8; background: #fafafa; user-select: none;
+  }
+  .guest-chip:hover { background: #f0ede8; border-color: #c9a96e; }
+  .guest-chip.dragging { opacity: 0.35; }
+  .guest-chip .remove-btn { margin-left: auto; font-size: 14px; color: #bbb; cursor: pointer; line-height: 1; }
+  .guest-chip .remove-btn:hover { color: #c0392b; }
+  .guest-initial {
+    width: 24px; height: 24px; border-radius: 50%; flex-shrink: 0;
+    background: #c9a96e; color: #fff; font-size: 10px; font-weight: 600;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .import-area { padding: 8px 12px; border-top: 1px solid #eee; }
+  .import-area textarea {
+    width: 100%; font-size: 11px; border: 1px solid #ddd; border-radius: 6px;
+    background: #fafafa; color: #222; padding: 6px 8px; resize: vertical;
+    min-height: 52px; max-height: 110px; font-family: inherit;
+  }
+  .import-area textarea:focus { outline: none; border-color: #8b6c42; }
+  .import-area button {
+    margin-top: 5px; width: 100%; padding: 7px; font-size: 12px;
+    background: #8b6c42; color: #fff; border: none; border-radius: 6px; cursor: pointer; font-weight: 500;
+  }
+  .import-area button:hover { background: #7a5c35; }
 
-  .canvas { flex: 1; overflow: auto; padding: 20px; background: var(--color-background-tertiary, var(--color-background-secondary)); position: relative; }
+  /* ── Canvas ───────────────────────────────────────────────────────────── */
+  .canvas { flex: 1; overflow-y: auto; overflow-x: auto; padding: 20px 24px; background: #f0ede8; }
+  .tables-stack { display: flex; flex-direction: column; gap: 24px; min-width: 600px; }
 
-  .tables-grid { display: flex; flex-wrap: wrap; gap: 20px; align-content: flex-start; }
-
-  .table-card { background: var(--color-background-primary); border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-lg); overflow: hidden; width: 220px; flex-shrink: 0; }
-  .table-card.drag-over { border-color: var(--color-border-info); background: var(--color-background-info); }
-  .table-header { padding: 10px 14px 8px; border-bottom: 0.5px solid var(--color-border-tertiary); }
-  .table-name-row { display: flex; align-items: center; gap: 6px; }
-  .table-name-input { font-size: 13px; font-weight: 500; border: none; background: transparent; color: var(--color-text-primary); width: 100%; padding: 0; }
+  /* ── Table card ───────────────────────────────────────────────────────── */
+  .table-card {
+    background: #fff; border: 1px solid #ddd; border-radius: 12px;
+    overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  }
+  .table-top-header {
+    display: flex; align-items: center; gap: 8px; padding: 10px 16px 8px;
+    border-bottom: 1px solid #f0ede8;
+  }
+  .table-name-input {
+    font-size: 14px; font-weight: 600; border: none; background: transparent;
+    color: #3a2c1e; flex: 1; padding: 0;
+  }
   .table-name-input:focus { outline: none; }
-  .table-meta { font-size: 11px; color: var(--color-text-tertiary); margin-top: 2px; }
-  .table-meta.full { color: var(--color-text-danger); }
+  .table-count { font-size: 12px; color: #999; }
+  .table-count.full { color: #c0392b; font-weight: 500; }
 
-  .seat-list { padding: 6px; min-height: 40px; }
-  .seat-chip { display: flex; align-items: center; gap: 6px; padding: 4px 8px; border-radius: var(--border-radius-md); font-size: 12px; margin-bottom: 3px; background: var(--color-background-secondary); cursor: pointer; }
-  .seat-chip:hover { background: var(--color-background-tertiary, var(--color-background-secondary)); }
-  .seat-chip .x { margin-left: auto; color: var(--color-text-tertiary); font-size: 11px; }
-  .seat-chip .x:hover { color: var(--color-text-danger); }
-  .seat-initial { width: 18px; height: 18px; border-radius: 50%; background: var(--color-background-success); color: var(--color-text-success); font-size: 9px; font-weight: 500; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  /* ── Seat layout ──────────────────────────────────────────────────────── */
+  .seat-layout { padding: 12px 16px; display: flex; flex-direction: column; gap: 0; }
 
-  .empty-drop { font-size: 12px; color: var(--color-text-tertiary); text-align: center; padding: 12px 8px; }
+  .seat-row {
+    display: flex; flex-wrap: wrap; gap: 5px; padding: 8px 0;
+  }
+  .seat-row.top-row { border-bottom: 2px solid #c9a96e; padding-bottom: 10px; }
+  .seat-row.bot-row { border-top: 2px solid #c9a96e; padding-top: 10px; }
 
-  .stats-bar { display: flex; gap: 16px; padding: 8px 16px; border-top: 0.5px solid var(--color-border-tertiary); font-size: 12px; color: var(--color-text-secondary); background: var(--color-background-primary); }
+  .table-surface {
+    padding: 6px 16px; background: #f5f0e8;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; color: #8b6c42; font-weight: 500; letter-spacing: 0.5px; text-transform: uppercase;
+  }
+
+  /* ── Seat slot ────────────────────────────────────────────────────────── */
+  .seat-slot {
+    width: 84px; height: 38px; border-radius: 7px;
+    border: 1.5px dashed #ccc; background: #fafafa;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; color: #bbb; cursor: default;
+    transition: border-color 0.15s, background 0.15s;
+    flex-shrink: 0; position: relative; overflow: hidden;
+  }
+  .seat-slot.occupied {
+    border: 1.5px solid #8b6c42; background: #fdf6ee;
+    cursor: grab; color: #3a2c1e;
+  }
+  .seat-slot.occupied:hover { background: #f5ead8; }
+  .seat-slot.occupied.dragging { opacity: 0.35; }
+  .seat-slot.drag-over { border-color: #4a9eca; background: #e8f4fb; border-style: solid; }
+  .seat-slot.drag-over-full { border-color: #c0392b; background: #fdecea; }
+
+  .seat-inner { display: flex; align-items: center; gap: 4px; padding: 0 5px; width: 100%; }
+  .seat-avatar {
+    width: 20px; height: 20px; border-radius: 50%; background: #c9a96e;
+    color: #fff; font-size: 9px; font-weight: 600; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .seat-name { flex: 1; font-size: 11px; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .seat-x { font-size: 12px; color: #bbb; cursor: pointer; flex-shrink: 0; line-height: 1; }
+  .seat-x:hover { color: #c0392b; }
+  .seat-num { font-size: 11px; color: #ccc; }
+
+  /* ── Stats bar ────────────────────────────────────────────────────────── */
+  .stats-bar {
+    display: flex; gap: 18px; padding: 8px 18px; font-size: 12px; color: #777;
+    background: #fff; border-top: 1px solid #ddd;
+  }
   .stat { display: flex; gap: 4px; }
-  .stat strong { color: var(--color-text-primary); font-weight: 500; }
-
-  .import-area { padding: 8px 14px; border-top: 0.5px solid var(--color-border-tertiary); }
-  .import-area textarea { width: 100%; font-size: 11px; border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-md); background: var(--color-background-secondary); color: var(--color-text-primary); padding: 6px 8px; resize: vertical; min-height: 50px; max-height: 100px; font-family: var(--font-sans); }
-  .import-area textarea:focus { outline: none; border-color: var(--color-border-primary); }
-  .import-actions { display: flex; gap: 6px; margin-top: 4px; }
+  .stat strong { color: #222; font-weight: 600; }
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 </head>
@@ -114,14 +185,14 @@
   </div>
 </div>
 
-<div class="app" id="app">
+<div class="app">
   <div class="toolbar">
     <span class="toolbar-title">Domaine de Valbonne</span>
     <div class="layout-toggle">
       <button class="layout-btn active" id="btn-layout-a" onclick="setLayout('A')">4 × 30</button>
       <button class="layout-btn" id="btn-layout-b" onclick="setLayout('B')">18 · 30 · 24 · 24 · 24</button>
     </div>
-    <button class="btn" onclick="clearAll()" title="Clear all seating assignments">Clear seats</button>
+    <button class="btn" onclick="clearAll()">Clear seats</button>
     <button class="btn" onclick="exportCSV()">Export CSV</button>
     <span id="sync-status">connecting…</span>
   </div>
@@ -129,48 +200,41 @@
   <div class="main">
     <div class="sidebar">
       <div class="sidebar-header">
-        <span>Unassigned guests</span>
-        <span id="unassigned-count" style="font-weight:500;color:var(--color-text-primary)">0</span>
+        <span>Unassigned</span>
+        <span id="unassigned-count" style="font-weight:600;color:#3a2c1e">0</span>
       </div>
-      <div class="guest-list" id="unassigned-list">
-      </div>
+      <div class="guest-list" id="unassigned-list"></div>
       <div class="import-area">
         <textarea id="bulk-input" placeholder="Paste names, one per line…"></textarea>
-        <div class="import-actions">
-          <button class="btn btn-primary" style="flex:1" onclick="bulkAdd()">Add names</button>
-        </div>
+        <button onclick="bulkAdd()">Add names</button>
       </div>
     </div>
 
     <div class="canvas">
-      <div class="tables-grid" id="tables-grid"></div>
+      <div class="tables-stack" id="tables-stack"></div>
     </div>
   </div>
 
   <div class="stats-bar">
-    <div class="stat">Total guests: <strong id="stat-total">0</strong></div>
+    <div class="stat">Total: <strong id="stat-total">0</strong></div>
     <div class="stat">Seated: <strong id="stat-seated">0</strong></div>
     <div class="stat">Unassigned: <strong id="stat-unassigned">0</strong></div>
     <div class="stat">Capacity: <strong id="stat-capacity">0</strong></div>
-    <div class="stat" id="stat-remaining-wrap">Remaining seats: <strong id="stat-remaining">0</strong></div>
+    <div class="stat">Open seats: <strong id="stat-remaining">0</strong></div>
   </div>
 </div>
 
 <script>
 // ── Auth ──────────────────────────────────────────────────────────────────────
 const PASSWORD = 'Provence';
-(function() {
-  if (sessionStorage.getItem('valbonne-auth') === '1') {
-    document.getElementById('auth-overlay').style.display = 'none';
-  }
-  document.getElementById('auth-input').addEventListener('keydown', e => {
-    if (e.key === 'Enter') checkPassword();
-  });
-})();
-
+if (sessionStorage.getItem('valbonne-auth') === '1') {
+  document.getElementById('auth-overlay').style.display = 'none';
+}
+document.getElementById('auth-input').addEventListener('keydown', e => {
+  if (e.key === 'Enter') checkPassword();
+});
 function checkPassword() {
-  const val = document.getElementById('auth-input').value;
-  if (val === PASSWORD) {
+  if (document.getElementById('auth-input').value === PASSWORD) {
     sessionStorage.setItem('valbonne-auth', '1');
     document.getElementById('auth-overlay').style.display = 'none';
   } else {
@@ -192,28 +256,23 @@ function setSyncStatus(s) {
 }
 
 let _ignoreNext = false;
-
-// Subscribe to remote changes
 sb.channel('seating')
   .on('postgres_changes', { event: '*', schema: 'public', table: 'seating_state' },
     payload => {
       if (_ignoreNext) { _ignoreNext = false; return; }
       if (payload.new?.state && Object.keys(payload.new.state).length) {
-        state = payload.new.state;
+        state = migrateState(payload.new.state);
         render();
         setSyncStatus('synced');
       }
     })
-  .subscribe(status => {
-    if (status === 'SUBSCRIBED') setSyncStatus('synced');
-  });
+  .subscribe(status => { if (status === 'SUBSCRIBED') setSyncStatus('synced'); });
 
-// Load initial state from Supabase on page load (overrides localStorage if row exists)
 (async () => {
   const { data, error } = await sb.from('seating_state').select('state').eq('id', 1).maybeSingle();
   if (error) { setSyncStatus('error'); return; }
   if (data?.state && Object.keys(data.state).length) {
-    state = data.state;
+    state = migrateState(data.state);
     render();
   }
   setSyncStatus('synced');
@@ -236,15 +295,30 @@ const LAYOUTS = {
   ]
 };
 
-let state = load() || {
-  layout: 'A',
-  guests: [],
-  seating: {},
-  tableNames: {}
+// State: seating[tableId] is a sparse object { seatIndex: guestName }
+let state = migrateState(loadLocal()) || {
+  layout: 'A', guests: [], seating: {}, tableNames: {}
 };
 
-let dragGuest = null;
+// Drag state
+let dragGuest = null;  // guest name being dragged
+let dragSource = null; // { type: 'unassigned' } | { type: 'seated', tableId, seatIndex }
 
+// ── State migration (from old array format) ───────────────────────────────────
+function migrateState(s) {
+  if (!s) return s;
+  if (!s.seating) s.seating = {};
+  Object.keys(s.seating).forEach(tid => {
+    if (Array.isArray(s.seating[tid])) {
+      const arr = s.seating[tid];
+      s.seating[tid] = {};
+      arr.forEach((name, i) => { if (name) s.seating[tid][i] = name; });
+    }
+  });
+  return s;
+}
+
+// ── Persistence ───────────────────────────────────────────────────────────────
 function save() {
   try { localStorage.setItem('valbonne-seating', JSON.stringify(state)); } catch(e) {}
   setSyncStatus('saving');
@@ -254,113 +328,111 @@ function save() {
     if (error) _ignoreNext = false;
   });
 }
-
-function load() {
+function loadLocal() {
   try {
     const d = localStorage.getItem('valbonne-seating');
     return d ? JSON.parse(d) : null;
   } catch(e) { return null; }
 }
 
+// ── Helpers ───────────────────────────────────────────────────────────────────
 function initials(name) {
   return name.trim().split(/\s+/).map(w => w[0]).join('').toUpperCase().slice(0, 2);
 }
+function firstName(name) {
+  return name.trim().split(/\s+/)[0];
+}
+function isSeated(name) {
+  return Object.values(state.seating).some(m => Object.values(m).includes(name));
+}
+function findSeat(name) {
+  for (const [tid, m] of Object.entries(state.seating)) {
+    for (const [si, n] of Object.entries(m)) {
+      if (n === name) return { tableId: tid, seatIndex: Number(si) };
+    }
+  }
+  return null;
+}
+function removeFromEverywhere(name) {
+  state.guests = state.guests.filter(g => g !== name);
+  Object.keys(state.seating).forEach(tid => {
+    Object.keys(state.seating[tid]).forEach(si => {
+      if (state.seating[tid][si] === name) delete state.seating[tid][si];
+    });
+  });
+}
 
+// ── Actions ───────────────────────────────────────────────────────────────────
 function setLayout(l) {
   if (state.layout === l) return;
-  const tables = LAYOUTS[l];
-  const newIds = tables.map(t => t.id);
-  const oldIds = Object.keys(state.seating);
-  oldIds.forEach(id => {
+  const newIds = LAYOUTS[l].map(t => t.id);
+  Object.keys(state.seating).forEach(id => {
     if (!newIds.includes(id)) {
-      (state.seating[id] || []).forEach(g => {
+      Object.values(state.seating[id]).forEach(g => {
         if (!state.guests.includes(g)) state.guests.push(g);
       });
       delete state.seating[id];
     }
   });
   state.layout = l;
-  save();
-  render();
+  save(); render();
 }
 
 function addGuest(name) {
   name = name.trim();
-  if (!name) return;
-  if (state.guests.includes(name) || isSeated(name)) return;
+  if (!name || state.guests.includes(name) || isSeated(name)) return;
   state.guests.push(name);
   save();
 }
 
-function isSeated(name) {
-  return Object.values(state.seating).some(arr => arr.includes(name));
-}
-
-function getTableForGuest(name) {
-  return Object.entries(state.seating).find(([,arr]) => arr.includes(name))?.[0];
-}
-
-function unassignGuest(name) {
-  Object.keys(state.seating).forEach(id => {
-    state.seating[id] = (state.seating[id] || []).filter(g => g !== name);
-  });
-  if (!state.guests.includes(name)) state.guests.push(name);
-  save();
-  render();
-}
-
-function removeGuest(name) {
-  state.guests = state.guests.filter(g => g !== name);
-  Object.keys(state.seating).forEach(id => {
-    state.seating[id] = (state.seating[id] || []).filter(g => g !== name);
-  });
-  save();
-  render();
-}
-
-function assignToTable(guestName, tableId) {
+function assignToSeat(guestName, tableId, seatIndex) {
   const tables = LAYOUTS[state.layout];
   const table = tables.find(t => t.id === tableId);
   if (!table) return;
-  const seated = (state.seating[tableId] || []);
-  if (seated.includes(guestName)) return;
-  if (seated.length >= table.cap) return;
-  state.guests = state.guests.filter(g => g !== guestName);
-  Object.keys(state.seating).forEach(id => {
-    state.seating[id] = (state.seating[id] || []).filter(g => g !== guestName);
-  });
-  if (!state.seating[tableId]) state.seating[tableId] = [];
-  state.seating[tableId].push(guestName);
-  save();
-  render();
+  if (!state.seating[tableId]) state.seating[tableId] = {};
+  if (state.seating[tableId][seatIndex]) return; // seat taken
+  removeFromEverywhere(guestName);
+  state.seating[tableId][seatIndex] = guestName;
+  save(); render();
+}
+
+function unassignSeat(tableId, seatIndex) {
+  const name = state.seating[tableId]?.[seatIndex];
+  if (!name) return;
+  delete state.seating[tableId][seatIndex];
+  state.guests.push(name);
+  save(); render();
+}
+
+function removeGuest(name) {
+  removeFromEverywhere(name);
+  save(); render();
 }
 
 function clearAll() {
-  const allGuests = [...state.guests];
-  Object.values(state.seating).forEach(arr => arr.forEach(g => { if (!allGuests.includes(g)) allGuests.push(g); }));
-  state.guests = allGuests;
+  const all = [...state.guests];
+  Object.values(state.seating).forEach(m => Object.values(m).forEach(g => { if (!all.includes(g)) all.push(g); }));
+  state.guests = all;
   state.seating = {};
-  save();
-  render();
+  save(); render();
 }
 
 function bulkAdd() {
   const ta = document.getElementById('bulk-input');
-  const lines = ta.value.split('\n').map(l => l.trim()).filter(Boolean);
-  lines.forEach(addGuest);
+  ta.value.split('\n').map(l => l.trim()).filter(Boolean).forEach(addGuest);
   ta.value = '';
-  save();
-  render();
+  save(); render();
 }
 
 function exportCSV() {
   const tables = LAYOUTS[state.layout];
-  const rows = [['Guest', 'Table']];
+  const rows = [['Guest', 'Table', 'Seat']];
   tables.forEach(t => {
-    const name = state.tableNames[t.id] || t.name;
-    (state.seating[t.id] || []).forEach(g => rows.push([g, name]));
+    const tname = state.tableNames[t.id] || t.name;
+    const m = state.seating[t.id] || {};
+    Object.entries(m).sort((a,b) => a[0]-b[0]).forEach(([si, g]) => rows.push([g, tname, Number(si)+1]));
   });
-  state.guests.forEach(g => rows.push([g, 'Unassigned']));
+  state.guests.forEach(g => rows.push([g, 'Unassigned', '']));
   const csv = rows.map(r => r.map(c => `"${c}"`).join(',')).join('\n');
   const a = document.createElement('a');
   a.href = 'data:text/csv,' + encodeURIComponent(csv);
@@ -368,16 +440,13 @@ function exportCSV() {
   a.click();
 }
 
+// ── Render ────────────────────────────────────────────────────────────────────
 function render() {
-  renderLayoutBtns();
+  document.getElementById('btn-layout-a').className = 'layout-btn' + (state.layout === 'A' ? ' active' : '');
+  document.getElementById('btn-layout-b').className = 'layout-btn' + (state.layout === 'B' ? ' active' : '');
   renderUnassigned();
   renderTables();
   renderStats();
-}
-
-function renderLayoutBtns() {
-  document.getElementById('btn-layout-a').className = 'layout-btn' + (state.layout === 'A' ? ' active' : '');
-  document.getElementById('btn-layout-b').className = 'layout-btn' + (state.layout === 'B' ? ' active' : '');
 }
 
 function renderUnassigned() {
@@ -385,86 +454,129 @@ function renderUnassigned() {
   list.innerHTML = '';
   const guests = state.guests.slice().sort();
   document.getElementById('unassigned-count').textContent = guests.length;
-  if (guests.length === 0) {
-    list.innerHTML = '<div style="font-size:12px;color:var(--color-text-tertiary);text-align:center;padding:16px 8px;">All guests seated!</div>';
+  if (!guests.length) {
+    list.innerHTML = '<div style="font-size:12px;color:#bbb;text-align:center;padding:18px 8px;">All guests seated!</div>';
     return;
   }
   guests.forEach(name => {
     const chip = document.createElement('div');
     chip.className = 'guest-chip';
     chip.draggable = true;
-    chip.dataset.guest = name;
-    chip.innerHTML = `<div class="guest-initial">${initials(name)}</div><span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${name}</span><span class="remove-btn" title="Remove guest">×</span>`;
+    chip.innerHTML = `<div class="guest-initial">${initials(name)}</div><span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${name}</span><span class="remove-btn" title="Remove">×</span>`;
     chip.querySelector('.remove-btn').addEventListener('click', e => { e.stopPropagation(); removeGuest(name); });
-    chip.addEventListener('dragstart', e => { dragGuest = name; chip.classList.add('dragging'); e.dataTransfer.effectAllowed = 'move'; });
-    chip.addEventListener('dragend', () => { dragGuest = null; chip.classList.remove('dragging'); });
+    chip.addEventListener('dragstart', e => {
+      dragGuest = name; dragSource = { type: 'unassigned' };
+      chip.classList.add('dragging'); e.dataTransfer.effectAllowed = 'move';
+    });
+    chip.addEventListener('dragend', () => { dragGuest = null; dragSource = null; chip.classList.remove('dragging'); });
     list.appendChild(chip);
   });
 }
 
+function makeSeatSlot(tableId, seatIndex, cap) {
+  const seatMap = state.seating[tableId] || {};
+  const guest = seatMap[seatIndex] || null;
+  const totalOccupied = Object.keys(seatMap).length;
+
+  const slot = document.createElement('div');
+  slot.className = 'seat-slot' + (guest ? ' occupied' : '');
+
+  if (guest) {
+    slot.draggable = true;
+    const inner = document.createElement('div');
+    inner.className = 'seat-inner';
+    inner.innerHTML = `<div class="seat-avatar">${initials(guest)}</div><span class="seat-name" title="${guest}">${firstName(guest)}</span><span class="seat-x" title="Unassign">×</span>`;
+    inner.querySelector('.seat-x').addEventListener('click', e => { e.stopPropagation(); unassignSeat(tableId, seatIndex); });
+    slot.appendChild(inner);
+    slot.addEventListener('dragstart', e => {
+      dragGuest = guest; dragSource = { type: 'seated', tableId, seatIndex };
+      slot.classList.add('dragging'); e.dataTransfer.effectAllowed = 'move';
+    });
+    slot.addEventListener('dragend', () => { dragGuest = null; dragSource = null; slot.classList.remove('dragging'); });
+  } else {
+    const num = document.createElement('span');
+    num.className = 'seat-num';
+    num.textContent = seatIndex + 1;
+    slot.appendChild(num);
+  }
+
+  // Drop target (only accept drops onto empty seats)
+  slot.addEventListener('dragover', e => {
+    if (!dragGuest || guest) return;
+    e.preventDefault();
+    slot.classList.add('drag-over');
+  });
+  slot.addEventListener('dragleave', () => slot.classList.remove('drag-over'));
+  slot.addEventListener('drop', e => {
+    e.preventDefault();
+    slot.classList.remove('drag-over');
+    if (dragGuest && !guest) assignToSeat(dragGuest, tableId, seatIndex);
+  });
+
+  return slot;
+}
+
 function renderTables() {
-  const grid = document.getElementById('tables-grid');
-  grid.innerHTML = '';
+  const stack = document.getElementById('tables-stack');
+  stack.innerHTML = '';
   const tables = LAYOUTS[state.layout];
+
   tables.forEach(t => {
-    const seated = state.seating[t.id] || [];
-    const name = state.tableNames[t.id] || t.name;
-    const full = seated.length >= t.cap;
+    const seatMap = state.seating[t.id] || {};
+    const seatedCount = Object.keys(seatMap).length;
+    const tname = state.tableNames[t.id] || t.name;
+    const full = seatedCount >= t.cap;
+    const topCount = Math.ceil(t.cap / 2);
 
     const card = document.createElement('div');
     card.className = 'table-card';
-    card.dataset.tableId = t.id;
 
-    card.addEventListener('dragover', e => { e.preventDefault(); if (!full || isSeated(dragGuest)) card.classList.add('drag-over'); });
-    card.addEventListener('dragleave', () => card.classList.remove('drag-over'));
-    card.addEventListener('drop', e => {
-      e.preventDefault();
-      card.classList.remove('drag-over');
-      if (dragGuest) assignToTable(dragGuest, t.id);
-    });
+    // Header
+    const hdr = document.createElement('div');
+    hdr.className = 'table-top-header';
+    const inp = document.createElement('input');
+    inp.className = 'table-name-input';
+    inp.value = tname;
+    inp.title = 'Click to rename';
+    inp.addEventListener('change', () => { state.tableNames[t.id] = inp.value.trim() || t.name; save(); });
+    const cnt = document.createElement('span');
+    cnt.className = 'table-count' + (full ? ' full' : '');
+    cnt.textContent = `${seatedCount} / ${t.cap}${full ? ' — full' : ''}`;
+    hdr.appendChild(inp);
+    hdr.appendChild(cnt);
+    card.appendChild(hdr);
 
-    const header = document.createElement('div');
-    header.className = 'table-header';
-    header.innerHTML = `
-      <div class="table-name-row">
-        <input class="table-name-input" value="${name}" title="Click to rename" />
-      </div>
-      <div class="table-meta ${full ? 'full' : ''}">${seated.length} / ${t.cap}${full ? ' — full' : ''}</div>
-    `;
-    const nameInput = header.querySelector('input');
-    nameInput.addEventListener('change', () => {
-      state.tableNames[t.id] = nameInput.value.trim() || t.name;
-      save();
-    });
+    // Seat layout
+    const layout = document.createElement('div');
+    layout.className = 'seat-layout';
 
-    const seatList = document.createElement('div');
-    seatList.className = 'seat-list';
-    if (seated.length === 0) {
-      seatList.innerHTML = '<div class="empty-drop">Drop guests here</div>';
-    } else {
-      seated.slice().sort().forEach(g => {
-        const sc = document.createElement('div');
-        sc.className = 'seat-chip';
-        sc.draggable = true;
-        sc.dataset.guest = g;
-        sc.innerHTML = `<div class="seat-initial">${initials(g)}</div><span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12px">${g}</span><span class="x" title="Move back to unassigned">×</span>`;
-        sc.querySelector('.x').addEventListener('click', e => { e.stopPropagation(); unassignGuest(g); });
-        sc.addEventListener('dragstart', e => { dragGuest = g; sc.classList.add('dragging'); e.dataTransfer.effectAllowed = 'move'; });
-        sc.addEventListener('dragend', () => { dragGuest = null; sc.classList.remove('dragging'); });
-        seatList.appendChild(sc);
-      });
-    }
+    // Top row
+    const topRow = document.createElement('div');
+    topRow.className = 'seat-row top-row';
+    for (let i = 0; i < topCount; i++) topRow.appendChild(makeSeatSlot(t.id, i, t.cap));
+    layout.appendChild(topRow);
 
-    card.appendChild(header);
-    card.appendChild(seatList);
-    grid.appendChild(card);
+    // Table surface label
+    const surf = document.createElement('div');
+    surf.className = 'table-surface';
+    surf.textContent = tname;
+    layout.appendChild(surf);
+
+    // Bottom row
+    const botRow = document.createElement('div');
+    botRow.className = 'seat-row bot-row';
+    for (let i = topCount; i < t.cap; i++) botRow.appendChild(makeSeatSlot(t.id, i, t.cap));
+    layout.appendChild(botRow);
+
+    card.appendChild(layout);
+    stack.appendChild(card);
   });
 }
 
 function renderStats() {
   const tables = LAYOUTS[state.layout];
   const totalCap = tables.reduce((s, t) => s + t.cap, 0);
-  const seated = Object.values(state.seating).reduce((s, a) => s + a.length, 0);
+  const seated = Object.values(state.seating).reduce((s, m) => s + Object.keys(m).length, 0);
   const total = state.guests.length + seated;
   document.getElementById('stat-total').textContent = total;
   document.getElementById('stat-seated').textContent = seated;
