@@ -601,7 +601,7 @@ function findAssignment(name) {
   return null;
 }
 function unassignedGuests() {
-  return state.allGuests.filter(g => !findAssignment(g)).sort();
+  return state.allGuests.filter(g => !findAssignment(g)).sort((a, b) => a.localeCompare(b));
 }
 
 // ── Group helpers & actions ────────────────────────────────────────────────────
@@ -826,7 +826,7 @@ function renderGuestList() {
     return;
   }
 
-  const sorted = [...state.allGuests].sort();
+  const sorted = [...state.allGuests].sort((a, b) => a.localeCompare(b));
   sorted.forEach(name => {
     const assignment = findAssignment(name);
     const assigned = !!assignment;
