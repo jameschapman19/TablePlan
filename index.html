@@ -475,6 +475,7 @@ function setSyncStatus(s) {
   syncEl.textContent = s === 'synced' ? 'synced' : s === 'saving' ? 'saving…' : s === 'error' ? 'sync error' : 'connecting…';
 }
 let _ignoreNext = false;
+let _savedSinceLoad = false;
 sb.channel('seating')
   .on('postgres_changes', { event: '*', schema: 'public', table: 'seating_state' },
     payload => {
@@ -487,7 +488,7 @@ sb.channel('seating')
 (async () => {
   const { data, error } = await sb.from('seating_state').select('state').eq('id', 1).maybeSingle();
   if (error) { setSyncStatus('error'); return; }
-  if (data?.state && Object.keys(data.state).length) { state = migrateState(data.state); render(); }
+  if (data?.state && Object.keys(data.state).length && !_savedSinceLoad) { state = migrateState(data.state); render(); }
   setSyncStatus('synced');
 })();
 
@@ -572,7 +573,7 @@ function migrateState(s) {
 // ── Persistence ───────────────────────────────────────────────────────────────
 function save() {
   try { localStorage.setItem('valbonne-seating', JSON.stringify(state)); } catch(e) {}
-  setSyncStatus('saving'); _ignoreNext = true;
+  setSyncStatus('saving'); _ignoreNext = true; _savedSinceLoad = true;
   sb.from('seating_state').upsert({ id: 1, state }).then(({ error }) => {
     setSyncStatus(error ? 'error' : 'synced'); if (error) _ignoreNext = false;
   });
