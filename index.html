@@ -2,9 +2,11 @@
 <html>
 <head>
 <meta charset="UTF-8">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: var(--font-sans, sans-serif); color: #222; background: #f0ede8; min-height: 600px; }
+  body { font-family: 'Inter', sans-serif; color: #222; background: #f0ede8; min-height: 600px; }
 
   /* ── Auth overlay ─────────────────────────────────────────────────────── */
   #auth-overlay {
@@ -12,159 +14,181 @@
     background: #f0ede8; display: flex; align-items: center; justify-content: center;
   }
   #auth-box {
-    background: #fff; border-radius: 14px; padding: 36px 32px; width: 320px;
-    box-shadow: 0 8px 40px rgba(0,0,0,0.22); text-align: center;
+    background: #fff; border-radius: 16px; padding: 40px 36px; width: 340px;
+    box-shadow: 0 12px 48px rgba(0,0,0,0.14); text-align: center;
   }
-  #auth-box h2 { font-size: 19px; font-weight: 600; margin-bottom: 6px; color: #1a1a1a; }
-  #auth-box p { font-size: 13px; color: #777; margin-bottom: 22px; }
+  #auth-box h2 {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: 22px; font-weight: 600; color: #3a2c1e; margin-bottom: 4px;
+  }
+  #auth-box .auth-sub { font-size: 12px; color: #b89b72; letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 6px; }
+  #auth-box .auth-divider { width: 40px; height: 1px; background: #e0d5c5; margin: 14px auto 20px; }
+  #auth-box p { font-size: 13px; color: #888; margin-bottom: 20px; }
   #auth-box input {
-    width: 100%; padding: 10px 14px; font-size: 15px;
-    border: 1.5px solid #ddd; border-radius: 8px; margin-bottom: 12px;
-    letter-spacing: 3px; text-align: center; color: #222;
+    width: 100%; padding: 11px 14px; font-size: 15px; font-family: 'Inter', sans-serif;
+    border: 1.5px solid #e0d5c5; border-radius: 8px; margin-bottom: 12px;
+    letter-spacing: 3px; text-align: center; color: #3a2c1e; background: #fdfcfa;
   }
   #auth-box input:focus { outline: none; border-color: #8b6c42; }
   #auth-box button {
-    width: 100%; padding: 11px; background: #8b6c42; color: #fff;
-    border: none; border-radius: 8px; font-size: 14px; cursor: pointer; font-weight: 500;
+    width: 100%; padding: 11px; background: #3a2c1e; color: #fff;
+    border: none; border-radius: 8px; font-size: 13px; font-family: 'Inter', sans-serif;
+    cursor: pointer; font-weight: 500; letter-spacing: 0.5px;
   }
-  #auth-box button:hover { background: #7a5c35; }
-  #auth-error { font-size: 12px; color: #c0392b; margin-top: 10px; display: none; }
+  #auth-box button:hover { background: #2c1f12; }
+  #auth-error { font-size: 12px; color: #b94040; margin-top: 10px; display: none; }
 
   /* ── App shell ────────────────────────────────────────────────────────── */
   .app { display: flex; flex-direction: column; height: 100vh; }
 
   .toolbar {
-    display: flex; align-items: center; gap: 10px; padding: 10px 16px;
-    background: #fff; border-bottom: 1px solid #ddd; flex-wrap: wrap;
-    box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+    display: flex; align-items: center; gap: 10px; padding: 11px 18px;
+    background: #fff; border-bottom: 1px solid #e8e0d5; flex-wrap: wrap;
+    box-shadow: 0 1px 6px rgba(0,0,0,0.05);
   }
-  .toolbar-title { font-size: 15px; font-weight: 600; margin-right: auto; color: #3a2c1e; letter-spacing: 0.3px; }
+  .toolbar-title {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: 16px; font-weight: 600; margin-right: auto; color: #3a2c1e;
+  }
   .layout-toggle { display: flex; gap: 4px; }
   .layout-btn {
-    font-size: 11px; padding: 5px 10px; border: 1px solid #ccc; border-radius: 20px;
-    background: transparent; color: #666; cursor: pointer;
+    font-size: 11px; padding: 5px 11px; border: 1px solid #d9cfc2; border-radius: 20px;
+    background: transparent; color: #888; cursor: pointer; font-family: 'Inter', sans-serif;
+    transition: all 0.15s;
   }
+  .layout-btn:hover { border-color: #8b6c42; color: #3a2c1e; }
   .layout-btn.active { background: #3a2c1e; color: #fff; border-color: #3a2c1e; font-weight: 500; }
   .btn {
-    font-size: 12px; padding: 6px 12px; border: 1px solid #ccc; border-radius: 6px;
-    background: #fff; color: #444; cursor: pointer; white-space: nowrap;
+    font-size: 12px; padding: 6px 13px; border: 1px solid #d9cfc2; border-radius: 6px;
+    background: #fff; color: #555; cursor: pointer; white-space: nowrap;
+    font-family: 'Inter', sans-serif; transition: all 0.15s;
   }
-  .btn:hover { background: #f5f5f5; }
+  .btn:hover { background: #faf7f3; border-color: #8b6c42; color: #3a2c1e; }
   #sync-status {
     font-size: 11px; padding: 3px 9px; border-radius: 20px;
-    background: #eee; color: #777; transition: all 0.3s;
+    background: #eee; color: #999; transition: all 0.3s;
   }
-  #sync-status.synced { background: #d4edda; color: #1a5c2e; }
-  #sync-status.saving { background: #fff3cd; color: #7a5c00; }
-  #sync-status.error  { background: #f8d7da; color: #721c24; }
+  #sync-status.synced { background: #e6f4ea; color: #2e7d4f; }
+  #sync-status.saving { background: #fef9e7; color: #8a6d00; }
+  #sync-status.error  { background: #fdecea; color: #9b2020; }
 
   .main { display: flex; flex: 1; min-height: 0; overflow: hidden; }
 
   /* ── Sidebar ──────────────────────────────────────────────────────────── */
   .sidebar {
-    width: 210px; min-width: 170px; background: #fff;
-    border-right: 1px solid #ddd; display: flex; flex-direction: column; overflow: hidden;
+    width: 215px; min-width: 170px; background: #fff;
+    border-right: 1px solid #e8e0d5; display: flex; flex-direction: column; overflow: hidden;
   }
   .sidebar-header {
-    padding: 10px 14px; font-size: 12px; font-weight: 500; color: #555;
-    border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center;
+    padding: 11px 14px; font-size: 11px; font-weight: 600; color: #888;
+    letter-spacing: 0.8px; text-transform: uppercase;
+    border-bottom: 1px solid #f0ebe3; display: flex; justify-content: space-between; align-items: center;
   }
   .guest-list { flex: 1; overflow-y: auto; padding: 6px; }
   .guest-chip {
-    display: flex; align-items: center; gap: 6px; padding: 5px 8px; border-radius: 7px;
+    display: flex; align-items: center; gap: 7px; padding: 5px 8px; border-radius: 7px;
     margin-bottom: 3px; font-size: 13px; cursor: grab;
-    border: 1px solid #e8e8e8; background: #fafafa; user-select: none;
+    border: 1px solid #ede8e0; background: #fdfcfa; user-select: none; transition: all 0.12s;
   }
-  .guest-chip:hover { background: #f0ede8; border-color: #c9a96e; }
-  .guest-chip.dragging { opacity: 0.35; }
-  .guest-chip .remove-btn { margin-left: auto; font-size: 14px; color: #bbb; cursor: pointer; line-height: 1; }
-  .guest-chip .remove-btn:hover { color: #c0392b; }
+  .guest-chip:hover { background: #f5f0e8; border-color: #c9a96e; }
+  .guest-chip.dragging { opacity: 0.3; }
+  .guest-chip .remove-btn { margin-left: auto; font-size: 15px; color: #ccc; cursor: pointer; line-height: 1; }
+  .guest-chip .remove-btn:hover { color: #b94040; }
   .guest-initial {
-    width: 24px; height: 24px; border-radius: 50%; flex-shrink: 0;
+    width: 26px; height: 26px; border-radius: 50%; flex-shrink: 0;
     background: #c9a96e; color: #fff; font-size: 10px; font-weight: 600;
-    display: flex; align-items: center; justify-content: center;
+    display: flex; align-items: center; justify-content: center; letter-spacing: 0;
   }
-  .import-area { padding: 8px 12px; border-top: 1px solid #eee; }
+  .import-area { padding: 9px 12px; border-top: 1px solid #f0ebe3; }
   .import-area textarea {
-    width: 100%; font-size: 11px; border: 1px solid #ddd; border-radius: 6px;
-    background: #fafafa; color: #222; padding: 6px 8px; resize: vertical;
-    min-height: 52px; max-height: 110px; font-family: inherit;
+    width: 100%; font-size: 11px; border: 1px solid #e0d8cc; border-radius: 6px;
+    background: #fdfcfa; color: #333; padding: 7px 9px; resize: vertical;
+    min-height: 54px; max-height: 120px; font-family: 'Inter', sans-serif;
   }
   .import-area textarea:focus { outline: none; border-color: #8b6c42; }
   .import-area button {
-    margin-top: 5px; width: 100%; padding: 7px; font-size: 12px;
-    background: #8b6c42; color: #fff; border: none; border-radius: 6px; cursor: pointer; font-weight: 500;
+    margin-top: 5px; width: 100%; padding: 8px; font-size: 12px;
+    background: #8b6c42; color: #fff; border: none; border-radius: 6px;
+    cursor: pointer; font-weight: 500; font-family: 'Inter', sans-serif; transition: background 0.15s;
   }
   .import-area button:hover { background: #7a5c35; }
 
   /* ── Canvas ───────────────────────────────────────────────────────────── */
-  .canvas { flex: 1; overflow-y: auto; overflow-x: auto; padding: 20px 24px; background: #f0ede8; }
-  .tables-stack { display: flex; flex-direction: column; gap: 24px; min-width: 600px; }
+  .canvas { flex: 1; overflow-y: auto; overflow-x: hidden; padding: 22px 26px; background: #f0ede8; }
+  .tables-stack { display: flex; flex-direction: column; gap: 20px; }
 
   /* ── Table card ───────────────────────────────────────────────────────── */
   .table-card {
-    background: #fff; border: 1px solid #ddd; border-radius: 12px;
-    overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    background: #fff; border: 1px solid #e4dbd0; border-radius: 12px;
+    overflow: hidden; box-shadow: 0 2px 10px rgba(58,44,30,0.07);
   }
   .table-top-header {
-    display: flex; align-items: center; gap: 8px; padding: 10px 16px 8px;
-    border-bottom: 1px solid #f0ede8;
+    display: flex; align-items: center; gap: 10px; padding: 11px 18px 9px;
+    border-bottom: 1px solid #f5f0e8;
   }
   .table-name-input {
     font-size: 14px; font-weight: 600; border: none; background: transparent;
-    color: #3a2c1e; flex: 1; padding: 0;
+    color: #3a2c1e; flex: 1; padding: 0; font-family: 'Playfair Display', Georgia, serif;
   }
   .table-name-input:focus { outline: none; }
-  .table-count { font-size: 12px; color: #999; }
-  .table-count.full { color: #c0392b; font-weight: 500; }
+  .table-count { font-size: 12px; color: #aaa; flex-shrink: 0; }
+  .table-count.full { color: #b94040; font-weight: 600; }
 
   /* ── Seat layout ──────────────────────────────────────────────────────── */
-  .seat-layout { padding: 12px 16px; display: flex; flex-direction: column; gap: 0; }
-  .seat-row { display: flex; flex-wrap: wrap; gap: 5px; padding: 8px 0; }
-  .seat-row.top-row { border-bottom: 2px solid #c9a96e; padding-bottom: 10px; }
-  .seat-row.bot-row { border-top: 2px solid #c9a96e; padding-top: 10px; }
+  .seat-layout { padding: 14px 18px; }
+
+  /* Rows scroll horizontally — preserves the "side of the table" line */
+  .seat-row {
+    display: flex; flex-wrap: nowrap; gap: 5px;
+    overflow-x: auto; padding: 9px 0;
+  }
+  .seat-row::-webkit-scrollbar { height: 3px; }
+  .seat-row::-webkit-scrollbar-thumb { background: #e0d5c5; border-radius: 2px; }
+  .seat-row.top-row { border-bottom: 3px solid #c9a96e; padding-bottom: 11px; }
+  .seat-row.bot-row { border-top: 3px solid #c9a96e; padding-top: 11px; }
 
   .table-surface {
-    padding: 6px 16px; background: #f5f0e8;
+    padding: 7px 18px; background: #f5efe4;
     display: flex; align-items: center; justify-content: center;
-    font-size: 12px; color: #8b6c42; font-weight: 500; letter-spacing: 0.5px; text-transform: uppercase;
+    font-size: 11px; color: #a07840; font-weight: 600;
+    letter-spacing: 1.5px; text-transform: uppercase;
   }
 
   /* ── Seat slot ────────────────────────────────────────────────────────── */
   .seat-slot {
-    width: 84px; height: 38px; border-radius: 7px;
-    border: 1.5px dashed #ccc; background: #fafafa;
+    min-width: 82px; height: 40px; border-radius: 7px; flex-shrink: 0;
+    border: 1.5px dashed #ddd; background: #fafaf8;
     display: flex; align-items: center; justify-content: center;
-    font-size: 11px; color: #bbb; cursor: default;
-    transition: border-color 0.15s, background 0.15s;
-    flex-shrink: 0; position: relative; overflow: hidden;
+    transition: border-color 0.15s, background 0.15s; position: relative; overflow: hidden;
   }
   .seat-slot.occupied {
-    border: 1.5px solid #8b6c42; background: #fdf6ee;
-    cursor: grab; color: #3a2c1e;
+    border: 1.5px solid #c9a96e; background: #fdf7ee; cursor: grab;
   }
-  .seat-slot.occupied:hover { background: #f5ead8; }
-  .seat-slot.occupied.dragging { opacity: 0.35; }
-  .seat-slot.drag-over { border-color: #4a9eca; background: #e8f4fb; border-style: solid; }
+  .seat-slot.occupied:hover { background: #f8edda; border-color: #8b6c42; }
+  .seat-slot.occupied.dragging { opacity: 0.3; }
+  .seat-slot.drag-over { border: 2px solid #5b9bd5; background: #edf5fc; }
 
-  .seat-inner { display: flex; align-items: center; gap: 4px; padding: 0 5px; width: 100%; }
+  .seat-inner { display: flex; align-items: center; gap: 4px; padding: 0 7px; width: 100%; }
   .seat-avatar {
-    width: 20px; height: 20px; border-radius: 50%; background: #c9a96e;
-    color: #fff; font-size: 9px; font-weight: 600; flex-shrink: 0;
+    width: 22px; height: 22px; border-radius: 50%; background: #c9a96e;
+    color: #fff; font-size: 9px; font-weight: 700; flex-shrink: 0;
     display: flex; align-items: center; justify-content: center;
   }
-  .seat-name { flex: 1; font-size: 11px; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .seat-x { font-size: 12px; color: #bbb; cursor: pointer; flex-shrink: 0; line-height: 1; }
-  .seat-x:hover { color: #c0392b; }
-  .seat-num { font-size: 11px; color: #ccc; }
+  .seat-name {
+    flex: 1; font-size: 11px; font-weight: 500; overflow: hidden;
+    text-overflow: ellipsis; white-space: nowrap; color: #3a2c1e;
+  }
+  .seat-x { font-size: 13px; color: #ccc; cursor: pointer; flex-shrink: 0; line-height: 1; padding-left: 1px; }
+  .seat-x:hover { color: #b94040; }
+  .seat-num { font-size: 11px; color: #d5cbc0; font-weight: 500; }
 
   /* ── Stats bar ────────────────────────────────────────────────────────── */
   .stats-bar {
-    display: flex; gap: 18px; padding: 8px 18px; font-size: 12px; color: #777;
-    background: #fff; border-top: 1px solid #ddd;
+    display: flex; gap: 20px; padding: 9px 20px; font-size: 12px; color: #999;
+    background: #fff; border-top: 1px solid #e8e0d5; flex-wrap: wrap;
   }
-  .stat { display: flex; gap: 4px; }
-  .stat strong { color: #222; font-weight: 600; }
+  .stat { display: flex; gap: 5px; align-items: center; }
+  .stat strong { color: #3a2c1e; font-weight: 600; }
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 </head>
@@ -174,7 +198,9 @@
 <div id="auth-overlay">
   <div id="auth-box">
     <h2>Domaine de Valbonne</h2>
-    <p>Enter the password to edit the seating plan</p>
+    <div class="auth-sub">Wedding Seating</div>
+    <div class="auth-divider"></div>
+    <p>Enter the password to continue</p>
     <input type="password" id="auth-input" placeholder="Password" autocomplete="current-password" />
     <button onclick="checkPassword()">Enter</button>
     <div id="auth-error">Incorrect password — try again</div>
@@ -185,10 +211,9 @@
   <div class="toolbar">
     <span class="toolbar-title">Domaine de Valbonne</span>
     <div class="layout-toggle">
-      <button class="layout-btn active" id="btn-layout-a" onclick="setLayout('A')">4 × 30</button>
-      <button class="layout-btn" id="btn-layout-b" onclick="setLayout('B')">18 · 30 · 24 · 24 · 24</button>
+      <button class="layout-btn active" id="btn-layout-a" onclick="setLayout('A')">Option A &nbsp;4 × 30</button>
+      <button class="layout-btn" id="btn-layout-b" onclick="setLayout('B')">Option B &nbsp;18 · 30 · 24 · 24 · 24</button>
     </div>
-    <button class="btn" onclick="clearAll()">Clear seats</button>
     <button class="btn" onclick="exportCSV()">Export CSV</button>
     <span id="sync-status">connecting…</span>
   </div>
@@ -197,7 +222,7 @@
     <div class="sidebar">
       <div class="sidebar-header">
         <span>Unassigned</span>
-        <span id="unassigned-count" style="font-weight:600;color:#3a2c1e">0</span>
+        <span id="unassigned-count" style="font-weight:700;color:#3a2c1e;font-size:13px;">0</span>
       </div>
       <div class="guest-list" id="unassigned-list"></div>
       <div class="import-area">
@@ -292,33 +317,26 @@ const LAYOUTS = {
 };
 
 // State:
-//   allGuests: string[]                         — global guest list
-//   layout: 'A' | 'B'                           — active layout
-//   seating: { A: { T1: { 0: name, ... } }, B: { ... } }
-//   tableNames: { A: { T1: 'name', ... }, B: { ... } }
+//   allGuests: string[]
+//   layout: 'A' | 'B'
+//   seating: { A: { T1: { 0: name, … } }, B: { … } }
+//   tableNames: { A: { T1: 'name', … }, B: { … } }
 let state = migrateState(loadLocal()) || freshState();
 
 function freshState() {
   return { layout: 'A', allGuests: [], seating: { A: {}, B: {} }, tableNames: { A: {}, B: {} } };
 }
 
-// Drag state
 let dragGuest = null;
-let dragSource = null; // { type: 'unassigned' } | { type: 'seated', tableId, seatIndex }
+let dragSource = null;
 
-// ── Migration (old → new format) ──────────────────────────────────────────────
+// ── Migration ─────────────────────────────────────────────────────────────────
 function migrateState(s) {
   if (!s) return s;
-
-  // guests → allGuests
   if (s.guests && !s.allGuests) { s.allGuests = [...s.guests]; delete s.guests; }
   if (!s.allGuests) s.allGuests = [];
-
-  // flat seating → per-layout seating
-  // Old flat format has keys like T1, T2 (not A/B)
   if (s.seating && !s.seating.A && !s.seating.B) {
-    const old = s.seating;
-    const layout = s.layout || 'A';
+    const old = s.seating; const layout = s.layout || 'A';
     s.seating = { A: {}, B: {} };
     Object.keys(old).forEach(tid => {
       if (Array.isArray(old[tid])) {
@@ -332,18 +350,13 @@ function migrateState(s) {
   if (!s.seating) s.seating = { A: {}, B: {} };
   if (!s.seating.A) s.seating.A = {};
   if (!s.seating.B) s.seating.B = {};
-
-  // flat tableNames → per-layout tableNames
   if (s.tableNames && !s.tableNames.A && !s.tableNames.B) {
-    const old = s.tableNames;
-    const layout = s.layout || 'A';
-    s.tableNames = { A: {}, B: {} };
-    s.tableNames[layout] = old;
+    const old = s.tableNames; const layout = s.layout || 'A';
+    s.tableNames = { A: {}, B: {} }; s.tableNames[layout] = old;
   }
   if (!s.tableNames) s.tableNames = { A: {}, B: {} };
   if (!s.tableNames.A) s.tableNames.A = {};
   if (!s.tableNames.B) s.tableNames.B = {};
-
   return s;
 }
 
@@ -365,12 +378,9 @@ function loadLocal() {
 function initials(name) {
   return name.trim().split(/\s+/).map(w => w[0]).join('').toUpperCase().slice(0, 2);
 }
-function firstName(name) {
-  return name.trim().split(/\s+/)[0];
-}
+function firstName(name) { return name.trim().split(/\s+/)[0]; }
 function currentSeating() { return state.seating[state.layout]; }
 function currentNames()   { return state.tableNames[state.layout]; }
-
 function isSeatedInLayout(name, layout) {
   const m = state.seating[layout];
   return m && Object.values(m).some(seats => Object.values(seats).includes(name));
@@ -382,25 +392,18 @@ function unassignedGuests() {
 // ── Actions ───────────────────────────────────────────────────────────────────
 function setLayout(l) {
   if (state.layout === l) return;
-  state.layout = l;
-  save(); render();
+  state.layout = l; save(); render();
 }
-
 function addGuest(name) {
   name = name.trim();
   if (!name || state.allGuests.includes(name)) return;
-  state.allGuests.push(name);
-  save();
+  state.allGuests.push(name); save();
 }
-
 function assignToSeat(guestName, tableId, seatIndex) {
-  const table = LAYOUTS[state.layout].find(t => t.id === tableId);
-  if (!table) return;
+  if (!LAYOUTS[state.layout].find(t => t.id === tableId)) return;
   const seats = currentSeating();
   if (!seats[tableId]) seats[tableId] = {};
-  if (seats[tableId][seatIndex]) return; // already taken
-
-  // Clear from source seat if dragging from another seat
+  if (seats[tableId][seatIndex]) return;
   if (dragSource?.type === 'seated') {
     const src = state.seating[state.layout][dragSource.tableId];
     if (src) delete src[dragSource.seatIndex];
@@ -408,17 +411,14 @@ function assignToSeat(guestName, tableId, seatIndex) {
   seats[tableId][seatIndex] = guestName;
   save(); render();
 }
-
 function unassignSeat(tableId, seatIndex) {
   const seats = currentSeating();
   if (!seats[tableId]?.[seatIndex]) return;
   delete seats[tableId][seatIndex];
   save(); render();
 }
-
 function removeGuest(name) {
   state.allGuests = state.allGuests.filter(g => g !== name);
-  // Remove from all layouts
   ['A', 'B'].forEach(l => {
     Object.keys(state.seating[l]).forEach(tid => {
       Object.keys(state.seating[l][tid]).forEach(si => {
@@ -428,19 +428,11 @@ function removeGuest(name) {
   });
   save(); render();
 }
-
-function clearAll() {
-  state.seating[state.layout] = {};
-  save(); render();
-}
-
 function bulkAdd() {
   const ta = document.getElementById('bulk-input');
   ta.value.split('\n').map(l => l.trim()).filter(Boolean).forEach(addGuest);
-  ta.value = '';
-  save(); render();
+  ta.value = ''; save(); render();
 }
-
 function exportCSV() {
   const tables = LAYOUTS[state.layout];
   const rows = [['Guest', 'Table', 'Seat']];
@@ -458,9 +450,7 @@ function exportCSV() {
 function render() {
   document.getElementById('btn-layout-a').className = 'layout-btn' + (state.layout === 'A' ? ' active' : '');
   document.getElementById('btn-layout-b').className = 'layout-btn' + (state.layout === 'B' ? ' active' : '');
-  renderUnassigned();
-  renderTables();
-  renderStats();
+  renderUnassigned(); renderTables(); renderStats();
 }
 
 function renderUnassigned() {
@@ -469,14 +459,14 @@ function renderUnassigned() {
   const guests = unassignedGuests();
   document.getElementById('unassigned-count').textContent = guests.length;
   if (!guests.length) {
-    list.innerHTML = '<div style="font-size:12px;color:#bbb;text-align:center;padding:18px 8px;">All guests seated!</div>';
+    list.innerHTML = '<div style="font-size:12px;color:#c9a96e;text-align:center;padding:20px 8px;font-style:italic;">All guests seated</div>';
     return;
   }
   guests.forEach(name => {
     const chip = document.createElement('div');
     chip.className = 'guest-chip';
     chip.draggable = true;
-    chip.innerHTML = `<div class="guest-initial">${initials(name)}</div><span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${name}</span><span class="remove-btn" title="Remove">×</span>`;
+    chip.innerHTML = `<div class="guest-initial">${initials(name)}</div><span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${name}</span><span class="remove-btn" title="Remove guest">×</span>`;
     chip.querySelector('.remove-btn').addEventListener('click', e => { e.stopPropagation(); removeGuest(name); });
     chip.addEventListener('dragstart', e => {
       dragGuest = name; dragSource = { type: 'unassigned' };
@@ -489,7 +479,6 @@ function renderUnassigned() {
 
 function makeSeatSlot(tableId, seatIndex) {
   const guest = currentSeating()[tableId]?.[seatIndex] || null;
-
   const slot = document.createElement('div');
   slot.className = 'seat-slot' + (guest ? ' occupied' : '');
 
@@ -545,7 +534,7 @@ function renderTables() {
     inp.addEventListener('change', () => { currentNames()[t.id] = inp.value.trim() || t.name; save(); });
     const cnt = document.createElement('span');
     cnt.className = 'table-count' + (full ? ' full' : '');
-    cnt.textContent = `${seatedCount} / ${t.cap}${full ? ' — full' : ''}`;
+    cnt.textContent = `${seatedCount} / ${t.cap}${full ? ' · full' : ''}`;
     hdr.appendChild(inp); hdr.appendChild(cnt);
     card.appendChild(hdr);
 
