@@ -818,21 +818,22 @@ function renderGuestList() {
     chip.draggable = true;
 
     const group = getGroup(name);
-    const dotColor = group ? group.color : '#ddd';
+    const iniColor = group ? group.color : (assigned ? '#d9cfc2' : '#c9a96e');
 
-    const ini = `<div class="guest-initial">${initials(name)}</div>`;
     const nameSpan = `<span style="flex:1;word-break:break-word">${name}</span>`;
     const badge = assigned ? `<span class="table-badge">${assignment.tableName}</span>` : '';
     const removeBtn = `<span class="remove-btn" title="Remove guest from list">×</span>`;
-    chip.innerHTML = ini + nameSpan + badge + removeBtn;
+    chip.innerHTML = nameSpan + badge + removeBtn;
 
-    // Insert group dot between avatar and name
-    const dot = document.createElement('div');
-    dot.className = 'group-dot';
-    dot.style.background = dotColor;
-    dot.title = group ? group.name : 'Assign group';
-    dot.addEventListener('click', e => { e.stopPropagation(); openGroupPicker(name, dot); });
-    chip.insertBefore(dot, chip.children[1]);
+    // Avatar — coloured by group, clickable to assign group
+    const iniEl = document.createElement('div');
+    iniEl.className = 'guest-initial';
+    iniEl.style.background = iniColor;
+    iniEl.style.cursor = 'pointer';
+    iniEl.title = group ? group.name + ' · click to change' : 'Click to assign group';
+    iniEl.textContent = initials(name);
+    iniEl.addEventListener('click', e => { e.stopPropagation(); openGroupPicker(name, iniEl); });
+    chip.insertBefore(iniEl, chip.firstChild);
 
     chip.querySelector('.remove-btn').addEventListener('click', e => { e.stopPropagation(); removeGuest(name); });
 
@@ -853,8 +854,8 @@ function makeSeatSlot(tableId, seatIndex) {
 
   if (guest) {
     const guestGroup = getGroup(guest);
-    slot.style.borderTop = '3px solid ' + (guestGroup ? guestGroup.color : '#c9a96e');
-    if (guestGroup) slot.style.background = guestGroup.color + '28';
+    slot.style.borderTop = '4px solid ' + (guestGroup ? guestGroup.color : '#c9a96e');
+    if (guestGroup) slot.style.background = guestGroup.color + '40';
 
     slot.draggable = true;
     const nameEl = document.createElement('span');
@@ -985,7 +986,7 @@ function closeGroupPicker() {
   groupPickerTarget = null;
 }
 document.addEventListener('click', e => {
-  if (!e.target.closest('#group-picker') && !e.target.classList.contains('group-dot')) closeGroupPicker();
+  if (!e.target.closest('#group-picker') && !e.target.classList.contains('guest-initial')) closeGroupPicker();
 });
 
 render();
