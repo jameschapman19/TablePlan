@@ -638,7 +638,7 @@ function setLayout(l) { if (state.layout === l) return; state.layout = l; save()
 function addGuest(name) {
   name = name.trim();
   if (!name || state.allGuests.includes(name)) return;
-  state.allGuests.push(name); save();
+  state.allGuests.push(name);
 }
 
 function assignToSeat(guestName, tableId, seatIndex) {
