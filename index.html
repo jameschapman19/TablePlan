@@ -241,9 +241,9 @@
   }
   #picker-empty { padding: 20px; text-align: center; font-size: 13px; color: #bbb; font-style: italic; }
 
-  /* ── Print styles — visual table layout ──────────────────────────────── */
+  /* ── Print styles — visual table layout, portrait A4 ─────────────────── */
   @media print {
-    @page { size: A4 landscape; margin: 11mm 13mm; }
+    @page { size: A4; margin: 12mm 13mm; }
 
     #auth-overlay, .toolbar, .sidebar, .stats-bar,
     #picker, #sidebar-backdrop { display: none !important; }
@@ -254,36 +254,15 @@
     .canvas { overflow: visible; padding: 0; background: #fff; }
     .tables-stack { display: flex; flex-direction: column; gap: 10px; }
 
+    /* Each table stays on one page — never splits */
     .table-card {
-      break-inside: avoid; box-shadow: none;
-      border: 1px solid #c9a96e; border-radius: 8px; overflow: visible;
+      break-inside: avoid; page-break-inside: avoid;
+      box-shadow: none; border: 1px solid #c9a96e; border-radius: 8px;
     }
-    .table-top-header { padding: 6px 12px; border-bottom: 1px solid #ede8e0; }
-    .table-name-input { font-size: 12px; pointer-events: none; }
-    .table-count { font-size: 10px; }
 
-    .seat-layout { padding: 7px 10px; }
-    .seat-row { overflow: visible !important; padding: 5px 0; gap: 3px; }
-    .seat-row.top-row { padding-bottom: 7px; }
-    .seat-row.bot-row { padding-top: 7px; }
-    .table-surface { padding: 4px 10px; font-size: 9px; letter-spacing: 1px; }
-
-    /* Seat slots: flip to landscape orientation, horizontal names */
-    .seat-slot {
-      width: 52px !important; height: 38px !important;
-      flex-direction: column !important;
-      justify-content: center !important; align-items: center !important;
-      padding: 2px !important; cursor: default !important; gap: 1px;
-    }
-    .seat-name-v {
-      writing-mode: horizontal-tb !important; transform: none !important;
-      font-size: 8.5px !important; max-height: none !important;
-      max-width: 48px !important; text-align: center !important;
-      overflow: hidden !important; text-overflow: ellipsis !important;
-      white-space: nowrap !important; line-height: 1.2 !important;
-    }
+    /* Seat rows: no scrollbar clip in print */
+    .seat-row { overflow: visible !important; }
     .seat-x-v { display: none !important; }
-    .seat-num { font-size: 8px !important; }
 
     .print-header {
       display: flex !important; justify-content: space-between; align-items: baseline;
