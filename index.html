@@ -854,7 +854,9 @@ function makeSeatSlot(tableId, seatIndex) {
 
   if (guest) {
     const guestGroup = getGroup(guest);
-    slot.style.borderTop = '4px solid ' + (guestGroup ? guestGroup.color : '#c9a96e');
+    const borderColor = guestGroup ? guestGroup.color : '#c9a96e';
+    slot.style.border = '1.5px solid ' + borderColor;
+    slot.style.borderTop = '4px solid ' + borderColor;
     if (guestGroup) slot.style.background = guestGroup.color + '40';
 
     slot.draggable = true;
