@@ -669,6 +669,7 @@ function unassignSeat(tableId, seatIndex) {
 
 function removeGuest(name) {
   state.allGuests = state.allGuests.filter(g => g !== name);
+  delete state.guestGroups[name];
   ['A', 'B'].forEach(l => {
     Object.keys(state.seating[l]).forEach(tid => {
       Object.keys(state.seating[l][tid]).forEach(si => {
