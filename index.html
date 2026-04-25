@@ -241,6 +241,60 @@
   }
   #picker-empty { padding: 20px; text-align: center; font-size: 13px; color: #bbb; font-style: italic; }
 
+  /* ── Print list (hidden on screen, shown in print) ───────────────────── */
+  .seat-print-list { display: none; }
+
+  /* ── Print styles ─────────────────────────────────────────────────────── */
+  @media print {
+    @page { size: A4; margin: 16mm 14mm; }
+
+    #auth-overlay, .toolbar, .sidebar, .stats-bar,
+    #picker, #sidebar-backdrop, .seat-layout { display: none !important; }
+
+    body { background: #fff; font-family: 'Inter', sans-serif; color: #111; }
+    .app { height: auto; display: block; }
+    .main { display: block; overflow: visible; }
+    .canvas { overflow: visible; padding: 0; background: #fff; }
+    .tables-stack { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+
+    .table-card {
+      break-inside: avoid; box-shadow: none;
+      border: 1px solid #bbb; border-radius: 8px; overflow: hidden;
+    }
+    .table-top-header {
+      background: #3a2c1e; color: #fff; padding: 8px 12px;
+      border-bottom: none;
+    }
+    .table-name-input {
+      color: #fff; background: transparent; font-size: 13px;
+      font-family: 'Playfair Display', serif;
+    }
+    .table-count { color: rgba(255,255,255,0.7); font-size: 11px; }
+    .table-count.full { color: #ffb3b3; }
+
+    .seat-print-list { display: block !important; padding: 8px 12px 10px; }
+    .seat-print-list ol {
+      list-style: none; margin: 0; padding: 0;
+      columns: 2; column-gap: 12px;
+    }
+    .seat-print-list li {
+      font-size: 11px; padding: 2px 0; color: #222;
+      display: flex; gap: 5px; break-inside: avoid;
+    }
+    .seat-print-list li .sn { color: #999; width: 18px; flex-shrink: 0; text-align: right; }
+    .seat-print-list li .gn { flex: 1; }
+    .seat-print-list li.empty .gn { color: #ccc; font-style: italic; }
+
+    .print-header {
+      display: flex !important; justify-content: space-between; align-items: baseline;
+      margin-bottom: 14px; padding-bottom: 8px; border-bottom: 2px solid #3a2c1e;
+    }
+    .print-header h1 {
+      font-family: 'Playfair Display', serif; font-size: 20px; color: #3a2c1e;
+    }
+    .print-header .print-meta { font-size: 11px; color: #888; }
+  }
+
   /* ── Stats bar ────────────────────────────────────────────────────────── */
   .stats-bar {
     display: flex; gap: 16px; padding: 8px 16px; font-size: 12px; color: #999;
@@ -329,6 +383,7 @@
       <span>Guests</span><span id="guests-toggle-count" style="font-size:11px;opacity:0.7"></span>
     </button>
     <button class="btn" onclick="exportCSV()">Export CSV</button>
+    <button class="btn" onclick="printPlan()">Print / PDF</button>
     <span id="sync-status">connecting…</span>
   </div>
 
@@ -349,6 +404,11 @@
     </div>
 
     <div class="canvas">
+      <!-- shown only in print -->
+      <div class="print-header" style="display:none">
+        <h1 id="print-title">Domaine de Valbonne</h1>
+        <div class="print-meta" id="print-meta"></div>
+      </div>
       <div class="tables-stack" id="tables-stack"></div>
     </div>
   </div>
@@ -564,6 +624,15 @@ function bulkAdd() {
   ta.value = ''; save(); render();
 }
 
+function printPlan() {
+  const label = state.layout === 'A' ? 'Option A — 4 × 30' : 'Option B — 18 · 30 · 24 · 24 · 24';
+  const seated = Object.values(currentSeating()).reduce((s, m) => s + Object.keys(m).length, 0);
+  document.getElementById('print-title').textContent = 'Domaine de Valbonne';
+  document.getElementById('print-meta').textContent =
+    `${label} · ${seated} seated · ${unassignedGuests().length} unassigned · ${new Date().toLocaleDateString('en-GB', { day:'numeric', month:'long', year:'numeric' })}`;
+  window.print();
+}
+
 function exportCSV() {
   const rows = [['Guest', 'Table', 'Seat']];
   LAYOUTS[state.layout].forEach(t => {
@@ -742,7 +811,23 @@ function renderTables() {
     for (let i = topCount; i < t.cap; i++) botRow.appendChild(makeSeatSlot(t.id, i));
     lo.appendChild(botRow);
 
-    card.appendChild(lo); stack.appendChild(card);
+    card.appendChild(lo);
+
+    // Print-only guest list
+    const printList = document.createElement('div');
+    printList.className = 'seat-print-list';
+    const ol = document.createElement('ol');
+    for (let i = 0; i < t.cap; i++) {
+      const g = seatMap[i];
+      const li = document.createElement('li');
+      if (!g) li.classList.add('empty');
+      li.innerHTML = `<span class="sn">${i + 1}.</span><span class="gn">${g || '—'}</span>`;
+      ol.appendChild(li);
+    }
+    printList.appendChild(ol);
+    card.appendChild(printList);
+
+    stack.appendChild(card);
   });
 }
 
