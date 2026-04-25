@@ -9,7 +9,7 @@
   /* ── Auth overlay ─────────────────────────────────────────────────────── */
   #auth-overlay {
     position: fixed; inset: 0; z-index: 9999;
-    background: rgba(0,0,0,0.55); display: flex; align-items: center; justify-content: center;
+    background: #f0ede8; display: flex; align-items: center; justify-content: center;
   }
   #auth-box {
     background: #fff; border-radius: 14px; padding: 36px 32px; width: 320px;
@@ -120,10 +120,7 @@
 
   /* ── Seat layout ──────────────────────────────────────────────────────── */
   .seat-layout { padding: 12px 16px; display: flex; flex-direction: column; gap: 0; }
-
-  .seat-row {
-    display: flex; flex-wrap: wrap; gap: 5px; padding: 8px 0;
-  }
+  .seat-row { display: flex; flex-wrap: wrap; gap: 5px; padding: 8px 0; }
   .seat-row.top-row { border-bottom: 2px solid #c9a96e; padding-bottom: 10px; }
   .seat-row.bot-row { border-top: 2px solid #c9a96e; padding-top: 10px; }
 
@@ -149,7 +146,6 @@
   .seat-slot.occupied:hover { background: #f5ead8; }
   .seat-slot.occupied.dragging { opacity: 0.35; }
   .seat-slot.drag-over { border-color: #4a9eca; background: #e8f4fb; border-style: solid; }
-  .seat-slot.drag-over-full { border-color: #c0392b; background: #fdecea; }
 
   .seat-inner { display: flex; align-items: center; gap: 4px; padding: 0 5px; width: 100%; }
   .seat-avatar {
@@ -216,7 +212,7 @@
   </div>
 
   <div class="stats-bar">
-    <div class="stat">Total: <strong id="stat-total">0</strong></div>
+    <div class="stat">Total guests: <strong id="stat-total">0</strong></div>
     <div class="stat">Seated: <strong id="stat-seated">0</strong></div>
     <div class="stat">Unassigned: <strong id="stat-unassigned">0</strong></div>
     <div class="stat">Capacity: <strong id="stat-capacity">0</strong></div>
@@ -295,26 +291,59 @@ const LAYOUTS = {
   ]
 };
 
-// State: seating[tableId] is a sparse object { seatIndex: guestName }
-let state = migrateState(loadLocal()) || {
-  layout: 'A', guests: [], seating: {}, tableNames: {}
-};
+// State:
+//   allGuests: string[]                         — global guest list
+//   layout: 'A' | 'B'                           — active layout
+//   seating: { A: { T1: { 0: name, ... } }, B: { ... } }
+//   tableNames: { A: { T1: 'name', ... }, B: { ... } }
+let state = migrateState(loadLocal()) || freshState();
+
+function freshState() {
+  return { layout: 'A', allGuests: [], seating: { A: {}, B: {} }, tableNames: { A: {}, B: {} } };
+}
 
 // Drag state
-let dragGuest = null;  // guest name being dragged
+let dragGuest = null;
 let dragSource = null; // { type: 'unassigned' } | { type: 'seated', tableId, seatIndex }
 
-// ── State migration (from old array format) ───────────────────────────────────
+// ── Migration (old → new format) ──────────────────────────────────────────────
 function migrateState(s) {
   if (!s) return s;
-  if (!s.seating) s.seating = {};
-  Object.keys(s.seating).forEach(tid => {
-    if (Array.isArray(s.seating[tid])) {
-      const arr = s.seating[tid];
-      s.seating[tid] = {};
-      arr.forEach((name, i) => { if (name) s.seating[tid][i] = name; });
-    }
-  });
+
+  // guests → allGuests
+  if (s.guests && !s.allGuests) { s.allGuests = [...s.guests]; delete s.guests; }
+  if (!s.allGuests) s.allGuests = [];
+
+  // flat seating → per-layout seating
+  // Old flat format has keys like T1, T2 (not A/B)
+  if (s.seating && !s.seating.A && !s.seating.B) {
+    const old = s.seating;
+    const layout = s.layout || 'A';
+    s.seating = { A: {}, B: {} };
+    Object.keys(old).forEach(tid => {
+      if (Array.isArray(old[tid])) {
+        s.seating[layout][tid] = {};
+        old[tid].forEach((name, i) => { if (name) s.seating[layout][tid][i] = name; });
+      } else if (old[tid] && typeof old[tid] === 'object') {
+        s.seating[layout][tid] = old[tid];
+      }
+    });
+  }
+  if (!s.seating) s.seating = { A: {}, B: {} };
+  if (!s.seating.A) s.seating.A = {};
+  if (!s.seating.B) s.seating.B = {};
+
+  // flat tableNames → per-layout tableNames
+  if (s.tableNames && !s.tableNames.A && !s.tableNames.B) {
+    const old = s.tableNames;
+    const layout = s.layout || 'A';
+    s.tableNames = { A: {}, B: {} };
+    s.tableNames[layout] = old;
+  }
+  if (!s.tableNames) s.tableNames = { A: {}, B: {} };
+  if (!s.tableNames.A) s.tableNames.A = {};
+  if (!s.tableNames.B) s.tableNames.B = {};
+
   return s;
 }
 
@@ -329,10 +358,7 @@ function save() {
   });
 }
 function loadLocal() {
-  try {
-    const d = localStorage.getItem('valbonne-seating');
-    return d ? JSON.parse(d) : null;
-  } catch(e) { return null; }
+  try { const d = localStorage.getItem('valbonne-seating'); return d ? JSON.parse(d) : null; } catch(e) { return null; }
 }
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
@@ -342,78 +368,69 @@ function initials(name) {
 function firstName(name) {
   return name.trim().split(/\s+/)[0];
 }
-function isSeated(name) {
-  return Object.values(state.seating).some(m => Object.values(m).includes(name));
+function currentSeating() { return state.seating[state.layout]; }
+function currentNames()   { return state.tableNames[state.layout]; }
+
+function isSeatedInLayout(name, layout) {
+  const m = state.seating[layout];
+  return m && Object.values(m).some(seats => Object.values(seats).includes(name));
 }
-function findSeat(name) {
-  for (const [tid, m] of Object.entries(state.seating)) {
-    for (const [si, n] of Object.entries(m)) {
-      if (n === name) return { tableId: tid, seatIndex: Number(si) };
-    }
-  }
-  return null;
-}
-function removeFromEverywhere(name) {
-  state.guests = state.guests.filter(g => g !== name);
-  Object.keys(state.seating).forEach(tid => {
-    Object.keys(state.seating[tid]).forEach(si => {
-      if (state.seating[tid][si] === name) delete state.seating[tid][si];
-    });
-  });
+function unassignedGuests() {
+  return state.allGuests.filter(g => !isSeatedInLayout(g, state.layout)).sort();
 }
 
 // ── Actions ───────────────────────────────────────────────────────────────────
 function setLayout(l) {
   if (state.layout === l) return;
-  const newIds = LAYOUTS[l].map(t => t.id);
-  Object.keys(state.seating).forEach(id => {
-    if (!newIds.includes(id)) {
-      Object.values(state.seating[id]).forEach(g => {
-        if (!state.guests.includes(g)) state.guests.push(g);
-      });
-      delete state.seating[id];
-    }
-  });
   state.layout = l;
   save(); render();
 }
 
 function addGuest(name) {
   name = name.trim();
-  if (!name || state.guests.includes(name) || isSeated(name)) return;
-  state.guests.push(name);
+  if (!name || state.allGuests.includes(name)) return;
+  state.allGuests.push(name);
   save();
 }
 
 function assignToSeat(guestName, tableId, seatIndex) {
-  const tables = LAYOUTS[state.layout];
-  const table = tables.find(t => t.id === tableId);
+  const table = LAYOUTS[state.layout].find(t => t.id === tableId);
   if (!table) return;
-  if (!state.seating[tableId]) state.seating[tableId] = {};
-  if (state.seating[tableId][seatIndex]) return; // seat taken
-  removeFromEverywhere(guestName);
-  state.seating[tableId][seatIndex] = guestName;
+  const seats = currentSeating();
+  if (!seats[tableId]) seats[tableId] = {};
+  if (seats[tableId][seatIndex]) return; // already taken
+
+  // Clear from source seat if dragging from another seat
+  if (dragSource?.type === 'seated') {
+    const src = state.seating[state.layout][dragSource.tableId];
+    if (src) delete src[dragSource.seatIndex];
+  }
+  seats[tableId][seatIndex] = guestName;
   save(); render();
 }
 
 function unassignSeat(tableId, seatIndex) {
-  const name = state.seating[tableId]?.[seatIndex];
-  if (!name) return;
-  delete state.seating[tableId][seatIndex];
-  state.guests.push(name);
+  const seats = currentSeating();
+  if (!seats[tableId]?.[seatIndex]) return;
+  delete seats[tableId][seatIndex];
   save(); render();
 }
 
 function removeGuest(name) {
-  removeFromEverywhere(name);
+  state.allGuests = state.allGuests.filter(g => g !== name);
+  // Remove from all layouts
+  ['A', 'B'].forEach(l => {
+    Object.keys(state.seating[l]).forEach(tid => {
+      Object.keys(state.seating[l][tid]).forEach(si => {
+        if (state.seating[l][tid][si] === name) delete state.seating[l][tid][si];
+      });
+    });
+  });
   save(); render();
 }
 
 function clearAll() {
-  const all = [...state.guests];
-  Object.values(state.seating).forEach(m => Object.values(m).forEach(g => { if (!all.includes(g)) all.push(g); }));
-  state.guests = all;
-  state.seating = {};
+  state.seating[state.layout] = {};
   save(); render();
 }
 
@@ -428,16 +445,13 @@ function exportCSV() {
   const tables = LAYOUTS[state.layout];
   const rows = [['Guest', 'Table', 'Seat']];
   tables.forEach(t => {
-    const tname = state.tableNames[t.id] || t.name;
-    const m = state.seating[t.id] || {};
+    const tname = currentNames()[t.id] || t.name;
+    const m = currentSeating()[t.id] || {};
     Object.entries(m).sort((a,b) => a[0]-b[0]).forEach(([si, g]) => rows.push([g, tname, Number(si)+1]));
   });
-  state.guests.forEach(g => rows.push([g, 'Unassigned', '']));
+  unassignedGuests().forEach(g => rows.push([g, 'Unassigned', '']));
   const csv = rows.map(r => r.map(c => `"${c}"`).join(',')).join('\n');
-  const a = document.createElement('a');
-  a.href = 'data:text/csv,' + encodeURIComponent(csv);
-  a.download = 'seating-plan.csv';
-  a.click();
+  const a = document.createElement('a'); a.href = 'data:text/csv,' + encodeURIComponent(csv); a.download = 'seating-plan.csv'; a.click();
 }
 
 // ── Render ────────────────────────────────────────────────────────────────────
@@ -452,7 +466,7 @@ function render() {
 function renderUnassigned() {
   const list = document.getElementById('unassigned-list');
   list.innerHTML = '';
-  const guests = state.guests.slice().sort();
+  const guests = unassignedGuests();
   document.getElementById('unassigned-count').textContent = guests.length;
   if (!guests.length) {
     list.innerHTML = '<div style="font-size:12px;color:#bbb;text-align:center;padding:18px 8px;">All guests seated!</div>';
@@ -473,10 +487,8 @@ function renderUnassigned() {
   });
 }
 
-function makeSeatSlot(tableId, seatIndex, cap) {
-  const seatMap = state.seating[tableId] || {};
-  const guest = seatMap[seatIndex] || null;
-  const totalOccupied = Object.keys(seatMap).length;
+function makeSeatSlot(tableId, seatIndex) {
+  const guest = currentSeating()[tableId]?.[seatIndex] || null;
 
   const slot = document.createElement('div');
   slot.className = 'seat-slot' + (guest ? ' occupied' : '');
@@ -500,16 +512,13 @@ function makeSeatSlot(tableId, seatIndex, cap) {
     slot.appendChild(num);
   }
 
-  // Drop target (only accept drops onto empty seats)
   slot.addEventListener('dragover', e => {
     if (!dragGuest || guest) return;
-    e.preventDefault();
-    slot.classList.add('drag-over');
+    e.preventDefault(); slot.classList.add('drag-over');
   });
   slot.addEventListener('dragleave', () => slot.classList.remove('drag-over'));
   slot.addEventListener('drop', e => {
-    e.preventDefault();
-    slot.classList.remove('drag-over');
+    e.preventDefault(); slot.classList.remove('drag-over');
     if (dragGuest && !guest) assignToSeat(dragGuest, tableId, seatIndex);
   });
 
@@ -519,53 +528,43 @@ function makeSeatSlot(tableId, seatIndex, cap) {
 function renderTables() {
   const stack = document.getElementById('tables-stack');
   stack.innerHTML = '';
-  const tables = LAYOUTS[state.layout];
-
-  tables.forEach(t => {
-    const seatMap = state.seating[t.id] || {};
+  LAYOUTS[state.layout].forEach(t => {
+    const seatMap = currentSeating()[t.id] || {};
     const seatedCount = Object.keys(seatMap).length;
-    const tname = state.tableNames[t.id] || t.name;
+    const tname = currentNames()[t.id] || t.name;
     const full = seatedCount >= t.cap;
     const topCount = Math.ceil(t.cap / 2);
 
     const card = document.createElement('div');
     card.className = 'table-card';
 
-    // Header
     const hdr = document.createElement('div');
     hdr.className = 'table-top-header';
     const inp = document.createElement('input');
-    inp.className = 'table-name-input';
-    inp.value = tname;
-    inp.title = 'Click to rename';
-    inp.addEventListener('change', () => { state.tableNames[t.id] = inp.value.trim() || t.name; save(); });
+    inp.className = 'table-name-input'; inp.value = tname; inp.title = 'Click to rename';
+    inp.addEventListener('change', () => { currentNames()[t.id] = inp.value.trim() || t.name; save(); });
     const cnt = document.createElement('span');
     cnt.className = 'table-count' + (full ? ' full' : '');
     cnt.textContent = `${seatedCount} / ${t.cap}${full ? ' — full' : ''}`;
-    hdr.appendChild(inp);
-    hdr.appendChild(cnt);
+    hdr.appendChild(inp); hdr.appendChild(cnt);
     card.appendChild(hdr);
 
-    // Seat layout
     const layout = document.createElement('div');
     layout.className = 'seat-layout';
 
-    // Top row
     const topRow = document.createElement('div');
     topRow.className = 'seat-row top-row';
-    for (let i = 0; i < topCount; i++) topRow.appendChild(makeSeatSlot(t.id, i, t.cap));
+    for (let i = 0; i < topCount; i++) topRow.appendChild(makeSeatSlot(t.id, i));
     layout.appendChild(topRow);
 
-    // Table surface label
     const surf = document.createElement('div');
     surf.className = 'table-surface';
     surf.textContent = tname;
     layout.appendChild(surf);
 
-    // Bottom row
     const botRow = document.createElement('div');
     botRow.className = 'seat-row bot-row';
-    for (let i = topCount; i < t.cap; i++) botRow.appendChild(makeSeatSlot(t.id, i, t.cap));
+    for (let i = topCount; i < t.cap; i++) botRow.appendChild(makeSeatSlot(t.id, i));
     layout.appendChild(botRow);
 
     card.appendChild(layout);
@@ -576,11 +575,11 @@ function renderTables() {
 function renderStats() {
   const tables = LAYOUTS[state.layout];
   const totalCap = tables.reduce((s, t) => s + t.cap, 0);
-  const seated = Object.values(state.seating).reduce((s, m) => s + Object.keys(m).length, 0);
-  const total = state.guests.length + seated;
-  document.getElementById('stat-total').textContent = total;
+  const seated = Object.values(currentSeating()).reduce((s, m) => s + Object.keys(m).length, 0);
+  const unassigned = unassignedGuests().length;
+  document.getElementById('stat-total').textContent = state.allGuests.length;
   document.getElementById('stat-seated').textContent = seated;
-  document.getElementById('stat-unassigned').textContent = state.guests.length;
+  document.getElementById('stat-unassigned').textContent = unassigned;
   document.getElementById('stat-capacity').textContent = totalCap;
   document.getElementById('stat-remaining').textContent = Math.max(0, totalCap - seated);
 }
