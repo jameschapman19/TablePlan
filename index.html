@@ -2,89 +2,92 @@
 <html>
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: 'Inter', sans-serif; color: #222; background: #f0ede8; min-height: 600px; }
+  body { font-family: 'Inter', sans-serif; color: #222; background: #f0ede8; }
 
-  /* ── Auth overlay ─────────────────────────────────────────────────────── */
+  /* ── Auth ─────────────────────────────────────────────────────────────── */
   #auth-overlay {
     position: fixed; inset: 0; z-index: 9999;
     background: #f0ede8; display: flex; align-items: center; justify-content: center;
   }
   #auth-box {
-    background: #fff; border-radius: 16px; padding: 40px 36px; width: 340px;
-    box-shadow: 0 12px 48px rgba(0,0,0,0.14); text-align: center;
+    background: #fff; border-radius: 16px; padding: 40px 36px; width: 320px;
+    box-shadow: 0 12px 48px rgba(0,0,0,0.13); text-align: center;
   }
-  #auth-box h2 {
-    font-family: 'Playfair Display', Georgia, serif;
-    font-size: 22px; font-weight: 600; color: #3a2c1e; margin-bottom: 4px;
-  }
-  #auth-box .auth-sub { font-size: 12px; color: #b89b72; letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 6px; }
-  #auth-box .auth-divider { width: 40px; height: 1px; background: #e0d5c5; margin: 14px auto 20px; }
-  #auth-box p { font-size: 13px; color: #888; margin-bottom: 20px; }
+  #auth-box h2 { font-family: 'Playfair Display', serif; font-size: 22px; color: #3a2c1e; margin-bottom: 3px; }
+  #auth-box .sub { font-size: 11px; color: #b89b72; letter-spacing: 1.5px; text-transform: uppercase; }
+  #auth-box hr { border: none; border-top: 1px solid #e8dfd0; margin: 16px auto; width: 40px; }
+  #auth-box p { font-size: 13px; color: #999; margin-bottom: 18px; }
   #auth-box input {
-    width: 100%; padding: 11px 14px; font-size: 15px; font-family: 'Inter', sans-serif;
-    border: 1.5px solid #e0d5c5; border-radius: 8px; margin-bottom: 12px;
-    letter-spacing: 3px; text-align: center; color: #3a2c1e; background: #fdfcfa;
+    width: 100%; padding: 11px 14px; font-size: 15px; letter-spacing: 3px;
+    text-align: center; border: 1.5px solid #e0d5c5; border-radius: 8px;
+    margin-bottom: 12px; background: #fdfcfa; color: #3a2c1e; font-family: 'Inter', sans-serif;
   }
   #auth-box input:focus { outline: none; border-color: #8b6c42; }
   #auth-box button {
     width: 100%; padding: 11px; background: #3a2c1e; color: #fff;
-    border: none; border-radius: 8px; font-size: 13px; font-family: 'Inter', sans-serif;
-    cursor: pointer; font-weight: 500; letter-spacing: 0.5px;
+    border: none; border-radius: 8px; font-size: 13px; font-weight: 500;
+    cursor: pointer; font-family: 'Inter', sans-serif; letter-spacing: 0.3px;
   }
   #auth-box button:hover { background: #2c1f12; }
   #auth-error { font-size: 12px; color: #b94040; margin-top: 10px; display: none; }
 
   /* ── App shell ────────────────────────────────────────────────────────── */
-  .app { display: flex; flex-direction: column; height: 100vh; }
+  .app { display: flex; flex-direction: column; height: 100dvh; }
 
   .toolbar {
-    display: flex; align-items: center; gap: 10px; padding: 11px 18px;
+    display: flex; align-items: center; gap: 8px; padding: 10px 14px;
     background: #fff; border-bottom: 1px solid #e8e0d5; flex-wrap: wrap;
-    box-shadow: 0 1px 6px rgba(0,0,0,0.05);
+    box-shadow: 0 1px 6px rgba(0,0,0,0.05); flex-shrink: 0;
   }
-  .toolbar-title {
-    font-family: 'Playfair Display', Georgia, serif;
-    font-size: 16px; font-weight: 600; margin-right: auto; color: #3a2c1e;
-  }
+  .toolbar-title { font-family: 'Playfair Display', serif; font-size: 16px; font-weight: 600; color: #3a2c1e; margin-right: auto; }
   .layout-toggle { display: flex; gap: 4px; }
   .layout-btn {
     font-size: 11px; padding: 5px 11px; border: 1px solid #d9cfc2; border-radius: 20px;
-    background: transparent; color: #888; cursor: pointer; font-family: 'Inter', sans-serif;
-    transition: all 0.15s;
+    background: transparent; color: #888; cursor: pointer; transition: all 0.15s;
   }
   .layout-btn:hover { border-color: #8b6c42; color: #3a2c1e; }
   .layout-btn.active { background: #3a2c1e; color: #fff; border-color: #3a2c1e; font-weight: 500; }
   .btn {
-    font-size: 12px; padding: 6px 13px; border: 1px solid #d9cfc2; border-radius: 6px;
-    background: #fff; color: #555; cursor: pointer; white-space: nowrap;
-    font-family: 'Inter', sans-serif; transition: all 0.15s;
+    font-size: 12px; padding: 6px 12px; border: 1px solid #d9cfc2; border-radius: 6px;
+    background: #fff; color: #555; cursor: pointer; white-space: nowrap; transition: all 0.15s;
   }
   .btn:hover { background: #faf7f3; border-color: #8b6c42; color: #3a2c1e; }
+  /* Mobile guests toggle button */
+  #guests-toggle {
+    display: none; font-size: 12px; padding: 6px 12px; border: 1px solid #c9a96e;
+    border-radius: 6px; background: #fdf7ee; color: #8b6c42; cursor: pointer;
+    font-weight: 500;
+  }
   #sync-status {
     font-size: 11px; padding: 3px 9px; border-radius: 20px;
-    background: #eee; color: #999; transition: all 0.3s;
+    background: #eee; color: #999; transition: all 0.3s; white-space: nowrap;
   }
   #sync-status.synced { background: #e6f4ea; color: #2e7d4f; }
   #sync-status.saving { background: #fef9e7; color: #8a6d00; }
   #sync-status.error  { background: #fdecea; color: #9b2020; }
 
-  .main { display: flex; flex: 1; min-height: 0; overflow: hidden; }
+  .main { display: flex; flex: 1; min-height: 0; overflow: hidden; position: relative; }
 
   /* ── Sidebar ──────────────────────────────────────────────────────────── */
   .sidebar {
-    width: 215px; min-width: 170px; background: #fff;
+    width: 215px; flex-shrink: 0; background: #fff;
     border-right: 1px solid #e8e0d5; display: flex; flex-direction: column; overflow: hidden;
+    transition: transform 0.3s ease;
   }
   .sidebar-header {
-    padding: 11px 14px; font-size: 11px; font-weight: 600; color: #888;
+    padding: 11px 14px; font-size: 11px; font-weight: 600; color: #999;
     letter-spacing: 0.8px; text-transform: uppercase;
     border-bottom: 1px solid #f0ebe3; display: flex; justify-content: space-between; align-items: center;
+    flex-shrink: 0;
   }
   .guest-list { flex: 1; overflow-y: auto; padding: 6px; }
+
+  /* Guest chip — two states */
   .guest-chip {
     display: flex; align-items: center; gap: 7px; padding: 5px 8px; border-radius: 7px;
     margin-bottom: 3px; font-size: 13px; cursor: grab;
@@ -92,30 +95,41 @@
   }
   .guest-chip:hover { background: #f5f0e8; border-color: #c9a96e; }
   .guest-chip.dragging { opacity: 0.3; }
-  .guest-chip .remove-btn { margin-left: auto; font-size: 15px; color: #ccc; cursor: pointer; line-height: 1; }
+  /* Assigned state */
+  .guest-chip.assigned {
+    background: #faf8f4; border-color: #e8dfd0; cursor: default;
+    opacity: 0.65;
+  }
+  .guest-chip.assigned:hover { background: #f5f0e8; opacity: 0.85; cursor: grab; }
+  .guest-chip .remove-btn { margin-left: auto; font-size: 15px; color: #ccc; cursor: pointer; line-height: 1; flex-shrink: 0; }
   .guest-chip .remove-btn:hover { color: #b94040; }
   .guest-initial {
     width: 26px; height: 26px; border-radius: 50%; flex-shrink: 0;
     background: #c9a96e; color: #fff; font-size: 10px; font-weight: 600;
-    display: flex; align-items: center; justify-content: center; letter-spacing: 0;
+    display: flex; align-items: center; justify-content: center;
   }
-  .import-area { padding: 9px 12px; border-top: 1px solid #f0ebe3; }
+  .guest-chip.assigned .guest-initial { background: #d9cfc2; }
+  .table-badge {
+    font-size: 10px; color: #8b6c42; background: #f5ede0; border: 1px solid #e8d8c0;
+    border-radius: 10px; padding: 1px 6px; white-space: nowrap; flex-shrink: 0;
+  }
+  .import-area { padding: 9px 12px; border-top: 1px solid #f0ebe3; flex-shrink: 0; }
   .import-area textarea {
     width: 100%; font-size: 11px; border: 1px solid #e0d8cc; border-radius: 6px;
     background: #fdfcfa; color: #333; padding: 7px 9px; resize: vertical;
-    min-height: 54px; max-height: 120px; font-family: 'Inter', sans-serif;
+    min-height: 54px; max-height: 100px; font-family: 'Inter', sans-serif;
   }
   .import-area textarea:focus { outline: none; border-color: #8b6c42; }
   .import-area button {
     margin-top: 5px; width: 100%; padding: 8px; font-size: 12px;
     background: #8b6c42; color: #fff; border: none; border-radius: 6px;
-    cursor: pointer; font-weight: 500; font-family: 'Inter', sans-serif; transition: background 0.15s;
+    cursor: pointer; font-weight: 500; font-family: 'Inter', sans-serif;
   }
   .import-area button:hover { background: #7a5c35; }
 
   /* ── Canvas ───────────────────────────────────────────────────────────── */
-  .canvas { flex: 1; overflow-y: auto; overflow-x: hidden; padding: 22px 26px; background: #f0ede8; }
-  .tables-stack { display: flex; flex-direction: column; gap: 20px; }
+  .canvas { flex: 1; overflow-y: auto; overflow-x: hidden; padding: 18px 20px; background: #f0ede8; }
+  .tables-stack { display: flex; flex-direction: column; gap: 18px; }
 
   /* ── Table card ───────────────────────────────────────────────────────── */
   .table-card {
@@ -123,72 +137,152 @@
     overflow: hidden; box-shadow: 0 2px 10px rgba(58,44,30,0.07);
   }
   .table-top-header {
-    display: flex; align-items: center; gap: 10px; padding: 11px 18px 9px;
+    display: flex; align-items: center; gap: 10px; padding: 10px 16px 8px;
     border-bottom: 1px solid #f5f0e8;
   }
   .table-name-input {
     font-size: 14px; font-weight: 600; border: none; background: transparent;
-    color: #3a2c1e; flex: 1; padding: 0; font-family: 'Playfair Display', Georgia, serif;
+    color: #3a2c1e; flex: 1; padding: 0; font-family: 'Playfair Display', serif;
   }
   .table-name-input:focus { outline: none; }
   .table-count { font-size: 12px; color: #aaa; flex-shrink: 0; }
   .table-count.full { color: #b94040; font-weight: 600; }
 
   /* ── Seat layout ──────────────────────────────────────────────────────── */
-  .seat-layout { padding: 14px 18px; }
-
-  /* Rows scroll horizontally — preserves the "side of the table" line */
+  .seat-layout { padding: 12px 16px; }
   .seat-row {
-    display: flex; flex-wrap: nowrap; gap: 5px;
-    overflow-x: auto; padding: 9px 0;
+    display: flex; flex-wrap: nowrap; gap: 4px;
+    overflow-x: auto; padding: 8px 0;
+    -webkit-overflow-scrolling: touch;
   }
   .seat-row::-webkit-scrollbar { height: 3px; }
   .seat-row::-webkit-scrollbar-thumb { background: #e0d5c5; border-radius: 2px; }
-  .seat-row.top-row { border-bottom: 3px solid #c9a96e; padding-bottom: 11px; }
-  .seat-row.bot-row { border-top: 3px solid #c9a96e; padding-top: 11px; }
+  .seat-row.top-row { border-bottom: 3px solid #c9a96e; padding-bottom: 10px; }
+  .seat-row.bot-row { border-top: 3px solid #c9a96e; padding-top: 10px; }
 
   .table-surface {
-    padding: 7px 18px; background: #f5efe4;
+    padding: 7px 16px; background: #f5efe4;
     display: flex; align-items: center; justify-content: center;
-    font-size: 11px; color: #a07840; font-weight: 600;
-    letter-spacing: 1.5px; text-transform: uppercase;
+    font-size: 11px; color: #a07840; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase;
   }
 
-  /* ── Seat slot ────────────────────────────────────────────────────────── */
+  /* ── Seat slot — portrait, vertical text ──────────────────────────────── */
   .seat-slot {
-    min-width: 82px; height: 40px; border-radius: 7px; flex-shrink: 0;
+    width: 36px; height: 76px; border-radius: 6px; flex-shrink: 0; position: relative;
     border: 1.5px dashed #ddd; background: #fafaf8;
-    display: flex; align-items: center; justify-content: center;
-    transition: border-color 0.15s, background 0.15s; position: relative; overflow: hidden;
+    display: flex; align-items: center; justify-content: flex-end; flex-direction: column;
+    padding-bottom: 5px; cursor: pointer; transition: border-color 0.15s, background 0.15s;
+    -webkit-tap-highlight-color: transparent;
   }
+  .seat-slot:hover:not(.occupied) { border-color: #c9a96e; background: #fdf7ee; }
   .seat-slot.occupied {
     border: 1.5px solid #c9a96e; background: #fdf7ee; cursor: grab;
+    align-items: center; justify-content: center; padding-bottom: 0;
   }
   .seat-slot.occupied:hover { background: #f8edda; border-color: #8b6c42; }
   .seat-slot.occupied.dragging { opacity: 0.3; }
   .seat-slot.drag-over { border: 2px solid #5b9bd5; background: #edf5fc; }
 
-  .seat-inner { display: flex; align-items: center; gap: 4px; padding: 0 7px; width: 100%; }
-  .seat-avatar {
-    width: 22px; height: 22px; border-radius: 50%; background: #c9a96e;
-    color: #fff; font-size: 9px; font-weight: 700; flex-shrink: 0;
+  /* Vertical name — reads top to bottom */
+  .seat-name-v {
+    writing-mode: vertical-lr; font-size: 11px; font-weight: 500; color: #3a2c1e;
+    overflow: hidden; white-space: nowrap; max-height: 62px;
+    text-overflow: ellipsis; line-height: 1.2;
+  }
+  .seat-x-v {
+    position: absolute; top: 3px; right: 3px;
+    font-size: 11px; color: #ccc; cursor: pointer; line-height: 1;
+    width: 14px; height: 14px; display: flex; align-items: center; justify-content: center;
+    border-radius: 50%; z-index: 1;
+  }
+  .seat-x-v:hover { color: #b94040; background: rgba(185,64,64,0.08); }
+  .seat-num { font-size: 10px; color: #d0c8be; font-weight: 500; }
+
+  /* ── Guest picker modal ───────────────────────────────────────────────── */
+  #picker {
+    display: none; position: fixed; inset: 0; z-index: 500;
+    background: rgba(0,0,0,0.35); align-items: center; justify-content: center;
+    padding: 16px;
+  }
+  #picker.open { display: flex; }
+  #picker-panel {
+    background: #fff; border-radius: 14px; width: 100%; max-width: 360px;
+    max-height: 70vh; display: flex; flex-direction: column;
+    box-shadow: 0 16px 48px rgba(0,0,0,0.18); overflow: hidden;
+  }
+  #picker-head {
+    padding: 14px 16px 10px; border-bottom: 1px solid #f0ebe3;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  #picker-title { font-size: 14px; font-weight: 600; color: #3a2c1e; }
+  #picker-subtitle { font-size: 12px; color: #999; margin-top: 1px; }
+  #picker-close {
+    font-size: 20px; color: #bbb; cursor: pointer; line-height: 1;
+    width: 28px; height: 28px; display: flex; align-items: center; justify-content: center;
+    border-radius: 50%; flex-shrink: 0;
+  }
+  #picker-close:hover { background: #f5f0e8; color: #3a2c1e; }
+  #picker-search {
+    margin: 10px 14px 6px; padding: 8px 12px; font-size: 13px; font-family: 'Inter', sans-serif;
+    border: 1.5px solid #e0d8cc; border-radius: 8px; color: #222; background: #fdfcfa;
+  }
+  #picker-search:focus { outline: none; border-color: #8b6c42; }
+  #picker-list { overflow-y: auto; flex: 1; padding: 4px 8px 10px; }
+  .picker-item {
+    padding: 9px 10px; border-radius: 7px; cursor: pointer;
+    font-size: 13px; display: flex; align-items: center; gap: 8px;
+    transition: background 0.1s;
+  }
+  .picker-item:hover { background: #f5f0e8; }
+  .picker-item .pi-initial {
+    width: 26px; height: 26px; border-radius: 50%; background: #c9a96e;
+    color: #fff; font-size: 10px; font-weight: 600; flex-shrink: 0;
     display: flex; align-items: center; justify-content: center;
   }
-  .seat-name {
-    flex: 1; font-size: 11px; font-weight: 500; overflow: hidden;
-    text-overflow: ellipsis; white-space: nowrap; color: #3a2c1e;
-  }
-  .seat-x { font-size: 13px; color: #ccc; cursor: pointer; flex-shrink: 0; line-height: 1; padding-left: 1px; }
-  .seat-x:hover { color: #b94040; }
-  .seat-num { font-size: 11px; color: #d5cbc0; font-weight: 500; }
+  #picker-empty { padding: 20px; text-align: center; font-size: 13px; color: #bbb; font-style: italic; }
 
   /* ── Stats bar ────────────────────────────────────────────────────────── */
   .stats-bar {
-    display: flex; gap: 20px; padding: 9px 20px; font-size: 12px; color: #999;
-    background: #fff; border-top: 1px solid #e8e0d5; flex-wrap: wrap;
+    display: flex; gap: 16px; padding: 8px 16px; font-size: 12px; color: #999;
+    background: #fff; border-top: 1px solid #e8e0d5; flex-wrap: wrap; flex-shrink: 0;
   }
-  .stat { display: flex; gap: 5px; align-items: center; }
+  .stat { display: flex; gap: 4px; }
   .stat strong { color: #3a2c1e; font-weight: 600; }
+
+  /* ── Mobile ───────────────────────────────────────────────────────────── */
+  @media (max-width: 640px) {
+    #guests-toggle { display: flex; align-items: center; gap: 5px; }
+    .toolbar-title { font-size: 14px; }
+
+    .sidebar {
+      position: fixed; bottom: 0; left: 0; right: 0; z-index: 200;
+      width: 100%; max-height: 55vh; border-right: none;
+      border-top: 1px solid #e8e0d5; border-radius: 16px 16px 0 0;
+      box-shadow: 0 -4px 24px rgba(0,0,0,0.12);
+      transform: translateY(100%);
+    }
+    .sidebar.open { transform: translateY(0); }
+    .sidebar-header { border-radius: 16px 16px 0 0; cursor: pointer; }
+    .sidebar-close { display: flex !important; }
+
+    .canvas { padding: 12px 12px; }
+    .tables-stack { gap: 14px; }
+    .seat-layout { padding: 10px 10px; }
+    .stats-bar { gap: 10px; padding: 7px 12px; }
+  }
+
+  .sidebar-close {
+    display: none; font-size: 18px; color: #bbb; cursor: pointer;
+    line-height: 1; padding: 0 2px;
+  }
+  .sidebar-close:hover { color: #3a2c1e; }
+
+  /* Sidebar overlay backdrop on mobile */
+  #sidebar-backdrop {
+    display: none; position: fixed; inset: 0; z-index: 199;
+    background: rgba(0,0,0,0.25);
+  }
+  #sidebar-backdrop.open { display: block; }
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 </head>
@@ -198,33 +292,56 @@
 <div id="auth-overlay">
   <div id="auth-box">
     <h2>Domaine de Valbonne</h2>
-    <div class="auth-sub">Wedding Seating</div>
-    <div class="auth-divider"></div>
+    <div class="sub">Wedding Seating</div>
+    <hr>
     <p>Enter the password to continue</p>
-    <input type="password" id="auth-input" placeholder="Password" autocomplete="current-password" />
+    <input type="password" id="auth-input" placeholder="Password" autocomplete="current-password">
     <button onclick="checkPassword()">Enter</button>
     <div id="auth-error">Incorrect password — try again</div>
   </div>
 </div>
 
+<!-- Guest picker modal -->
+<div id="picker">
+  <div id="picker-panel">
+    <div id="picker-head">
+      <div>
+        <div id="picker-title">Assign guest</div>
+        <div id="picker-subtitle"></div>
+      </div>
+      <div id="picker-close" onclick="closePicker()">×</div>
+    </div>
+    <input id="picker-search" type="text" placeholder="Search guests…" oninput="renderPickerList()">
+    <div id="picker-list"></div>
+  </div>
+</div>
+
+<div id="sidebar-backdrop" onclick="closeSidebar()"></div>
+
 <div class="app">
   <div class="toolbar">
     <span class="toolbar-title">Domaine de Valbonne</span>
     <div class="layout-toggle">
-      <button class="layout-btn active" id="btn-layout-a" onclick="setLayout('A')">Option A &nbsp;4 × 30</button>
-      <button class="layout-btn" id="btn-layout-b" onclick="setLayout('B')">Option B &nbsp;18 · 30 · 24 · 24 · 24</button>
+      <button class="layout-btn active" id="btn-layout-a" onclick="setLayout('A')">Option A</button>
+      <button class="layout-btn" id="btn-layout-b" onclick="setLayout('B')">Option B</button>
     </div>
+    <button id="guests-toggle" onclick="toggleSidebar()">
+      <span>Guests</span><span id="guests-toggle-count" style="font-size:11px;opacity:0.7"></span>
+    </button>
     <button class="btn" onclick="exportCSV()">Export CSV</button>
     <span id="sync-status">connecting…</span>
   </div>
 
   <div class="main">
-    <div class="sidebar">
-      <div class="sidebar-header">
-        <span>Unassigned</span>
-        <span id="unassigned-count" style="font-weight:700;color:#3a2c1e;font-size:13px;">0</span>
+    <div class="sidebar" id="sidebar">
+      <div class="sidebar-header" onclick="closeSidebar()">
+        <span>Guests</span>
+        <div style="display:flex;align-items:center;gap:8px">
+          <span id="unassigned-count" style="font-weight:700;color:#3a2c1e;font-size:13px">0</span>
+          <span class="sidebar-close">×</span>
+        </div>
       </div>
-      <div class="guest-list" id="unassigned-list"></div>
+      <div class="guest-list" id="guest-list"></div>
       <div class="import-area">
         <textarea id="bulk-input" placeholder="Paste names, one per line…"></textarea>
         <button onclick="bulkAdd()">Add names</button>
@@ -237,7 +354,7 @@
   </div>
 
   <div class="stats-bar">
-    <div class="stat">Total guests: <strong id="stat-total">0</strong></div>
+    <div class="stat">Total: <strong id="stat-total">0</strong></div>
     <div class="stat">Seated: <strong id="stat-seated">0</strong></div>
     <div class="stat">Unassigned: <strong id="stat-unassigned">0</strong></div>
     <div class="stat">Capacity: <strong id="stat-capacity">0</strong></div>
@@ -251,9 +368,7 @@ const PASSWORD = 'Provence';
 if (sessionStorage.getItem('valbonne-auth') === '1') {
   document.getElementById('auth-overlay').style.display = 'none';
 }
-document.getElementById('auth-input').addEventListener('keydown', e => {
-  if (e.key === 'Enter') checkPassword();
-});
+document.getElementById('auth-input').addEventListener('keydown', e => { if (e.key === 'Enter') checkPassword(); });
 function checkPassword() {
   if (document.getElementById('auth-input').value === PASSWORD) {
     sessionStorage.setItem('valbonne-auth', '1');
@@ -263,6 +378,19 @@ function checkPassword() {
     document.getElementById('auth-input').value = '';
     document.getElementById('auth-input').focus();
   }
+}
+
+// ── Sidebar (mobile) ──────────────────────────────────────────────────────────
+function toggleSidebar() {
+  const sb = document.getElementById('sidebar');
+  const bd = document.getElementById('sidebar-backdrop');
+  const open = sb.classList.contains('open');
+  sb.classList.toggle('open', !open);
+  bd.classList.toggle('open', !open);
+}
+function closeSidebar() {
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('sidebar-backdrop').classList.remove('open');
 }
 
 // ── Supabase ──────────────────────────────────────────────────────────────────
@@ -275,27 +403,20 @@ function setSyncStatus(s) {
   syncEl.className = s;
   syncEl.textContent = s === 'synced' ? 'synced' : s === 'saving' ? 'saving…' : s === 'error' ? 'sync error' : 'connecting…';
 }
-
 let _ignoreNext = false;
 sb.channel('seating')
   .on('postgres_changes', { event: '*', schema: 'public', table: 'seating_state' },
     payload => {
       if (_ignoreNext) { _ignoreNext = false; return; }
       if (payload.new?.state && Object.keys(payload.new.state).length) {
-        state = migrateState(payload.new.state);
-        render();
-        setSyncStatus('synced');
+        state = migrateState(payload.new.state); render(); setSyncStatus('synced');
       }
     })
-  .subscribe(status => { if (status === 'SUBSCRIBED') setSyncStatus('synced'); });
-
+  .subscribe(s => { if (s === 'SUBSCRIBED') setSyncStatus('synced'); });
 (async () => {
   const { data, error } = await sb.from('seating_state').select('state').eq('id', 1).maybeSingle();
   if (error) { setSyncStatus('error'); return; }
-  if (data?.state && Object.keys(data.state).length) {
-    state = migrateState(data.state);
-    render();
-  }
+  if (data?.state && Object.keys(data.state).length) { state = migrateState(data.state); render(); }
   setSyncStatus('synced');
 })();
 
@@ -316,13 +437,7 @@ const LAYOUTS = {
   ]
 };
 
-// State:
-//   allGuests: string[]
-//   layout: 'A' | 'B'
-//   seating: { A: { T1: { 0: name, … } }, B: { … } }
-//   tableNames: { A: { T1: 'name', … }, B: { … } }
 let state = migrateState(loadLocal()) || freshState();
-
 function freshState() {
   return { layout: 'A', allGuests: [], seating: { A: {}, B: {} }, tableNames: { A: {}, B: {} } };
 }
@@ -330,18 +445,21 @@ function freshState() {
 let dragGuest = null;
 let dragSource = null;
 
+// Picker state
+let pickerSeat = null; // { tableId, seatIndex }
+
 // ── Migration ─────────────────────────────────────────────────────────────────
 function migrateState(s) {
   if (!s) return s;
   if (s.guests && !s.allGuests) { s.allGuests = [...s.guests]; delete s.guests; }
   if (!s.allGuests) s.allGuests = [];
   if (s.seating && !s.seating.A && !s.seating.B) {
-    const old = s.seating; const layout = s.layout || 'A';
+    const old = s.seating, layout = s.layout || 'A';
     s.seating = { A: {}, B: {} };
     Object.keys(old).forEach(tid => {
       if (Array.isArray(old[tid])) {
         s.seating[layout][tid] = {};
-        old[tid].forEach((name, i) => { if (name) s.seating[layout][tid][i] = name; });
+        old[tid].forEach((n, i) => { if (n) s.seating[layout][tid][i] = n; });
       } else if (old[tid] && typeof old[tid] === 'object') {
         s.seating[layout][tid] = old[tid];
       }
@@ -351,7 +469,7 @@ function migrateState(s) {
   if (!s.seating.A) s.seating.A = {};
   if (!s.seating.B) s.seating.B = {};
   if (s.tableNames && !s.tableNames.A && !s.tableNames.B) {
-    const old = s.tableNames; const layout = s.layout || 'A';
+    const old = s.tableNames, layout = s.layout || 'A';
     s.tableNames = { A: {}, B: {} }; s.tableNames[layout] = old;
   }
   if (!s.tableNames) s.tableNames = { A: {}, B: {} };
@@ -363,11 +481,9 @@ function migrateState(s) {
 // ── Persistence ───────────────────────────────────────────────────────────────
 function save() {
   try { localStorage.setItem('valbonne-seating', JSON.stringify(state)); } catch(e) {}
-  setSyncStatus('saving');
-  _ignoreNext = true;
+  setSyncStatus('saving'); _ignoreNext = true;
   sb.from('seating_state').upsert({ id: 1, state }).then(({ error }) => {
-    setSyncStatus(error ? 'error' : 'synced');
-    if (error) _ignoreNext = false;
+    setSyncStatus(error ? 'error' : 'synced'); if (error) _ignoreNext = false;
   });
 }
 function loadLocal() {
@@ -375,48 +491,61 @@ function loadLocal() {
 }
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
-function initials(name) {
-  return name.trim().split(/\s+/).map(w => w[0]).join('').toUpperCase().slice(0, 2);
-}
-function firstName(name) { return name.trim().split(/\s+/)[0]; }
+function initials(name) { return name.trim().split(/\s+/).map(w => w[0]).join('').toUpperCase().slice(0, 2); }
 function currentSeating() { return state.seating[state.layout]; }
 function currentNames()   { return state.tableNames[state.layout]; }
-function isSeatedInLayout(name, layout) {
-  const m = state.seating[layout];
-  return m && Object.values(m).some(seats => Object.values(seats).includes(name));
+
+// Returns { tableId, seatIndex, tableName } or null
+function findAssignment(name) {
+  const cs = currentSeating();
+  for (const [tid, seats] of Object.entries(cs)) {
+    for (const [si, n] of Object.entries(seats)) {
+      if (n === name) {
+        const tname = currentNames()[tid] || (LAYOUTS[state.layout].find(t => t.id === tid)?.name || tid);
+        return { tableId: tid, seatIndex: Number(si), tableName: tname };
+      }
+    }
+  }
+  return null;
 }
 function unassignedGuests() {
-  return state.allGuests.filter(g => !isSeatedInLayout(g, state.layout)).sort();
+  return state.allGuests.filter(g => !findAssignment(g)).sort();
 }
 
 // ── Actions ───────────────────────────────────────────────────────────────────
-function setLayout(l) {
-  if (state.layout === l) return;
-  state.layout = l; save(); render();
-}
+function setLayout(l) { if (state.layout === l) return; state.layout = l; save(); render(); }
+
 function addGuest(name) {
   name = name.trim();
   if (!name || state.allGuests.includes(name)) return;
   state.allGuests.push(name); save();
 }
+
 function assignToSeat(guestName, tableId, seatIndex) {
   if (!LAYOUTS[state.layout].find(t => t.id === tableId)) return;
   const seats = currentSeating();
   if (!seats[tableId]) seats[tableId] = {};
-  if (seats[tableId][seatIndex]) return;
+  if (seats[tableId][seatIndex]) return; // occupied
+  // Clear previous seat if moving from another seat (drag or reassign)
   if (dragSource?.type === 'seated') {
-    const src = state.seating[state.layout][dragSource.tableId];
+    const src = seats[dragSource.tableId];
     if (src) delete src[dragSource.seatIndex];
+  } else {
+    // Remove from any current seat in this layout
+    const current = findAssignment(guestName);
+    if (current) delete seats[current.tableId][current.seatIndex];
   }
   seats[tableId][seatIndex] = guestName;
   save(); render();
 }
+
 function unassignSeat(tableId, seatIndex) {
   const seats = currentSeating();
   if (!seats[tableId]?.[seatIndex]) return;
   delete seats[tableId][seatIndex];
   save(); render();
 }
+
 function removeGuest(name) {
   state.allGuests = state.allGuests.filter(g => g !== name);
   ['A', 'B'].forEach(l => {
@@ -428,15 +557,16 @@ function removeGuest(name) {
   });
   save(); render();
 }
+
 function bulkAdd() {
   const ta = document.getElementById('bulk-input');
   ta.value.split('\n').map(l => l.trim()).filter(Boolean).forEach(addGuest);
   ta.value = ''; save(); render();
 }
+
 function exportCSV() {
-  const tables = LAYOUTS[state.layout];
   const rows = [['Guest', 'Table', 'Seat']];
-  tables.forEach(t => {
+  LAYOUTS[state.layout].forEach(t => {
     const tname = currentNames()[t.id] || t.name;
     const m = currentSeating()[t.id] || {};
     Object.entries(m).sort((a,b) => a[0]-b[0]).forEach(([si, g]) => rows.push([g, tname, Number(si)+1]));
@@ -446,30 +576,88 @@ function exportCSV() {
   const a = document.createElement('a'); a.href = 'data:text/csv,' + encodeURIComponent(csv); a.download = 'seating-plan.csv'; a.click();
 }
 
+// ── Picker ────────────────────────────────────────────────────────────────────
+function openPicker(tableId, seatIndex) {
+  pickerSeat = { tableId, seatIndex };
+  const tname = currentNames()[tableId] || (LAYOUTS[state.layout].find(t => t.id === tableId)?.name || '');
+  document.getElementById('picker-title').textContent = tname;
+  document.getElementById('picker-subtitle').textContent = `Seat ${seatIndex + 1}`;
+  document.getElementById('picker-search').value = '';
+  renderPickerList();
+  document.getElementById('picker').classList.add('open');
+  setTimeout(() => document.getElementById('picker-search').focus(), 50);
+}
+function closePicker() {
+  pickerSeat = null;
+  document.getElementById('picker').classList.remove('open');
+}
+document.getElementById('picker').addEventListener('click', e => { if (e.target === document.getElementById('picker')) closePicker(); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closePicker(); });
+
+function renderPickerList() {
+  const q = document.getElementById('picker-search').value.trim().toLowerCase();
+  const guests = unassignedGuests().filter(g => !q || g.toLowerCase().includes(q));
+  const list = document.getElementById('picker-list');
+  list.innerHTML = '';
+  if (!guests.length) {
+    list.innerHTML = '<div id="picker-empty">No unassigned guests</div>';
+    return;
+  }
+  guests.forEach(name => {
+    const item = document.createElement('div');
+    item.className = 'picker-item';
+    item.innerHTML = `<div class="pi-initial">${initials(name)}</div><span>${name}</span>`;
+    item.addEventListener('click', () => {
+      if (!pickerSeat) return;
+      dragSource = null; // picker assign, not drag
+      assignToSeat(name, pickerSeat.tableId, pickerSeat.seatIndex);
+      closePicker();
+    });
+    list.appendChild(item);
+  });
+}
+
 // ── Render ────────────────────────────────────────────────────────────────────
 function render() {
   document.getElementById('btn-layout-a').className = 'layout-btn' + (state.layout === 'A' ? ' active' : '');
   document.getElementById('btn-layout-b').className = 'layout-btn' + (state.layout === 'B' ? ' active' : '');
-  renderUnassigned(); renderTables(); renderStats();
+  renderGuestList();
+  renderTables();
+  renderStats();
 }
 
-function renderUnassigned() {
-  const list = document.getElementById('unassigned-list');
+function renderGuestList() {
+  const list = document.getElementById('guest-list');
   list.innerHTML = '';
-  const guests = unassignedGuests();
-  document.getElementById('unassigned-count').textContent = guests.length;
-  if (!guests.length) {
-    list.innerHTML = '<div style="font-size:12px;color:#c9a96e;text-align:center;padding:20px 8px;font-style:italic;">All guests seated</div>';
+  const unassigned = unassignedGuests().length;
+  document.getElementById('unassigned-count').textContent = unassigned + ' unassigned';
+  document.getElementById('guests-toggle-count').textContent = unassigned ? ` · ${unassigned}` : '';
+
+  if (!state.allGuests.length) {
+    list.innerHTML = '<div style="font-size:12px;color:#bbb;text-align:center;padding:20px 8px;">No guests added yet</div>';
     return;
   }
-  guests.forEach(name => {
+
+  const sorted = [...state.allGuests].sort();
+  sorted.forEach(name => {
+    const assignment = findAssignment(name);
+    const assigned = !!assignment;
+
     const chip = document.createElement('div');
-    chip.className = 'guest-chip';
+    chip.className = 'guest-chip' + (assigned ? ' assigned' : '');
     chip.draggable = true;
-    chip.innerHTML = `<div class="guest-initial">${initials(name)}</div><span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${name}</span><span class="remove-btn" title="Remove guest">×</span>`;
+
+    const ini = `<div class="guest-initial">${initials(name)}</div>`;
+    const nameSpan = `<span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${name}</span>`;
+    const badge = assigned ? `<span class="table-badge">${assignment.tableName}</span>` : '';
+    const removeBtn = `<span class="remove-btn" title="Remove guest from list">×</span>`;
+    chip.innerHTML = ini + nameSpan + badge + removeBtn;
+
     chip.querySelector('.remove-btn').addEventListener('click', e => { e.stopPropagation(); removeGuest(name); });
+
     chip.addEventListener('dragstart', e => {
-      dragGuest = name; dragSource = { type: 'unassigned' };
+      dragGuest = name;
+      dragSource = assigned ? { type: 'seated', tableId: assignment.tableId, seatIndex: assignment.seatIndex } : { type: 'unassigned' };
       chip.classList.add('dragging'); e.dataTransfer.effectAllowed = 'move';
     });
     chip.addEventListener('dragend', () => { dragGuest = null; dragSource = null; chip.classList.remove('dragging'); });
@@ -484,21 +672,27 @@ function makeSeatSlot(tableId, seatIndex) {
 
   if (guest) {
     slot.draggable = true;
-    const inner = document.createElement('div');
-    inner.className = 'seat-inner';
-    inner.innerHTML = `<div class="seat-avatar">${initials(guest)}</div><span class="seat-name" title="${guest}">${firstName(guest)}</span><span class="seat-x" title="Unassign">×</span>`;
-    inner.querySelector('.seat-x').addEventListener('click', e => { e.stopPropagation(); unassignSeat(tableId, seatIndex); });
-    slot.appendChild(inner);
+    const nameEl = document.createElement('span');
+    nameEl.className = 'seat-name-v';
+    nameEl.textContent = guest.trim().split(/\s+/)[0]; // first name
+    nameEl.title = guest;
+    const xEl = document.createElement('span');
+    xEl.className = 'seat-x-v'; xEl.textContent = '×'; xEl.title = 'Unassign';
+    xEl.addEventListener('click', e => { e.stopPropagation(); unassignSeat(tableId, seatIndex); });
+    slot.appendChild(xEl);
+    slot.appendChild(nameEl);
     slot.addEventListener('dragstart', e => {
       dragGuest = guest; dragSource = { type: 'seated', tableId, seatIndex };
       slot.classList.add('dragging'); e.dataTransfer.effectAllowed = 'move';
     });
     slot.addEventListener('dragend', () => { dragGuest = null; dragSource = null; slot.classList.remove('dragging'); });
+    // Click occupied seat → open picker to move (optional: skip if already occupied)
+    slot.addEventListener('click', e => { if (!dragGuest) openPicker(tableId, seatIndex); });
   } else {
     const num = document.createElement('span');
-    num.className = 'seat-num';
-    num.textContent = seatIndex + 1;
+    num.className = 'seat-num'; num.textContent = seatIndex + 1;
     slot.appendChild(num);
+    slot.addEventListener('click', () => openPicker(tableId, seatIndex));
   }
 
   slot.addEventListener('dragover', e => {
@@ -524,46 +718,36 @@ function renderTables() {
     const full = seatedCount >= t.cap;
     const topCount = Math.ceil(t.cap / 2);
 
-    const card = document.createElement('div');
-    card.className = 'table-card';
+    const card = document.createElement('div'); card.className = 'table-card';
 
-    const hdr = document.createElement('div');
-    hdr.className = 'table-top-header';
+    const hdr = document.createElement('div'); hdr.className = 'table-top-header';
     const inp = document.createElement('input');
     inp.className = 'table-name-input'; inp.value = tname; inp.title = 'Click to rename';
     inp.addEventListener('change', () => { currentNames()[t.id] = inp.value.trim() || t.name; save(); });
     const cnt = document.createElement('span');
     cnt.className = 'table-count' + (full ? ' full' : '');
     cnt.textContent = `${seatedCount} / ${t.cap}${full ? ' · full' : ''}`;
-    hdr.appendChild(inp); hdr.appendChild(cnt);
-    card.appendChild(hdr);
+    hdr.appendChild(inp); hdr.appendChild(cnt); card.appendChild(hdr);
 
-    const layout = document.createElement('div');
-    layout.className = 'seat-layout';
+    const lo = document.createElement('div'); lo.className = 'seat-layout';
 
-    const topRow = document.createElement('div');
-    topRow.className = 'seat-row top-row';
+    const topRow = document.createElement('div'); topRow.className = 'seat-row top-row';
     for (let i = 0; i < topCount; i++) topRow.appendChild(makeSeatSlot(t.id, i));
-    layout.appendChild(topRow);
+    lo.appendChild(topRow);
 
-    const surf = document.createElement('div');
-    surf.className = 'table-surface';
-    surf.textContent = tname;
-    layout.appendChild(surf);
+    const surf = document.createElement('div'); surf.className = 'table-surface'; surf.textContent = tname;
+    lo.appendChild(surf);
 
-    const botRow = document.createElement('div');
-    botRow.className = 'seat-row bot-row';
+    const botRow = document.createElement('div'); botRow.className = 'seat-row bot-row';
     for (let i = topCount; i < t.cap; i++) botRow.appendChild(makeSeatSlot(t.id, i));
-    layout.appendChild(botRow);
+    lo.appendChild(botRow);
 
-    card.appendChild(layout);
-    stack.appendChild(card);
+    card.appendChild(lo); stack.appendChild(card);
   });
 }
 
 function renderStats() {
-  const tables = LAYOUTS[state.layout];
-  const totalCap = tables.reduce((s, t) => s + t.cap, 0);
+  const totalCap = LAYOUTS[state.layout].reduce((s, t) => s + t.cap, 0);
   const seated = Object.values(currentSeating()).reduce((s, m) => s + Object.keys(m).length, 0);
   const unassigned = unassignedGuests().length;
   document.getElementById('stat-total').textContent = state.allGuests.length;
