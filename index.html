@@ -89,7 +89,7 @@
 
   /* Guest chip — two states */
   .guest-chip {
-    display: flex; align-items: center; gap: 7px; padding: 5px 8px; border-radius: 7px;
+    display: flex; align-items: flex-start; gap: 7px; padding: 5px 8px; border-radius: 7px;
     margin-bottom: 3px; font-size: 13px; cursor: grab;
     border: 1px solid #ede8e0; background: #fdfcfa; user-select: none; transition: all 0.12s;
   }
@@ -695,7 +695,7 @@ function renderGuestList() {
     chip.draggable = true;
 
     const ini = `<div class="guest-initial">${initials(name)}</div>`;
-    const nameSpan = `<span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${name}</span>`;
+    const nameSpan = `<span style="flex:1;word-break:break-word">${name}</span>`;
     const badge = assigned ? `<span class="table-badge">${assignment.tableName}</span>` : '';
     const removeBtn = `<span class="remove-btn" title="Remove guest from list">×</span>`;
     chip.innerHTML = ini + nameSpan + badge + removeBtn;
