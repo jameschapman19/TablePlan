@@ -721,7 +721,7 @@ function makeSeatSlot(tableId, seatIndex) {
     slot.draggable = true;
     const nameEl = document.createElement('span');
     nameEl.className = 'seat-name-v';
-    nameEl.textContent = guest.trim().split(/\s+/)[0]; // first name
+    nameEl.textContent = guest.trim();
     nameEl.title = guest;
     const xEl = document.createElement('span');
     xEl.className = 'seat-x-v'; xEl.textContent = '×'; xEl.title = 'Unassign';
