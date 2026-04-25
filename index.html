@@ -320,6 +320,29 @@
     background: rgba(0,0,0,0.25);
   }
   #sidebar-backdrop.open { display: block; }
+
+  /* ── Group legend & dots ──────────────────────────────────────────────── */
+  .group-legend { padding: 6px 10px 4px; border-bottom: 1px solid #f0ebe3; display: flex; flex-wrap: wrap; gap: 5px; align-items: center; }
+  .group-pill { display: flex; align-items: center; gap: 4px; padding: 2px 8px 2px 6px; border-radius: 12px; font-size: 11px; cursor: default; border: 1px solid transparent; background: #f5f0e8; }
+  .group-pill:hover { filter: brightness(0.95); }
+  .group-pill input { border: none; background: transparent; font-size: 11px; font-family: inherit; width: 80px; padding: 0; color: inherit; cursor: text; }
+  .group-pill .pill-swatch { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  .group-pill .pill-x { font-size: 13px; color: #bbb; cursor: pointer; margin-left: 2px; line-height: 1; }
+  .group-pill .pill-x:hover { color: #b94040; }
+  .group-add-btn { font-size: 16px; color: #8b6c42; cursor: pointer; line-height: 1; padding: 0 3px; margin-left: 2px; }
+  .group-add-btn:hover { color: #3a2c1e; }
+  .group-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; cursor: pointer; border: 1.5px solid rgba(0,0,0,0.12); }
+  #group-picker { background: #fff; border: 1px solid #e0d8cc; border-radius: 10px; box-shadow: 0 6px 24px rgba(0,0,0,0.14); padding: 5px; min-width: 160px; }
+  .gp-item { display: flex; align-items: center; gap: 7px; padding: 6px 9px; border-radius: 7px; cursor: pointer; font-size: 12px; }
+  .gp-item:hover { background: #f5f0e8; }
+  .gp-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; border: 1.5px solid rgba(0,0,0,0.12); }
+
+  /* ── Print: group legend key ──────────────────────────────────────────── */
+  @media print {
+    .print-group-legend { display: flex !important; flex-wrap: wrap; gap: 8px; margin-top: 6px; }
+    .print-group-pill { display: flex; align-items: center; gap: 4px; font-size: 10px; color: #555; }
+    .print-group-swatch { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+  }
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 </head>
@@ -355,6 +378,9 @@
 
 <div id="sidebar-backdrop" onclick="closeSidebar()"></div>
 
+<!-- Floating group picker -->
+<div id="group-picker" style="display:none; position:fixed; z-index:600;"></div>
+
 <div class="app">
   <div class="toolbar">
     <span class="toolbar-title">Domaine de Valbonne</span>
@@ -379,6 +405,7 @@
           <span class="sidebar-close">×</span>
         </div>
       </div>
+      <div class="group-legend" id="group-legend"></div>
       <div class="guest-list" id="guest-list"></div>
       <div class="import-area">
         <textarea id="bulk-input" placeholder="Paste names, one per line…"></textarea>
@@ -392,6 +419,7 @@
         <h1 id="print-title">Domaine de Valbonne</h1>
         <div class="print-meta" id="print-meta"></div>
       </div>
+      <div class="print-group-legend" id="print-group-legend" style="display:none"></div>
       <div class="tables-stack" id="tables-stack"></div>
     </div>
   </div>
@@ -482,8 +510,10 @@ const LAYOUTS = {
 
 let state = migrateState(loadLocal()) || freshState();
 function freshState() {
-  return { layout: 'A', allGuests: [], seating: { A: {}, B: {} }, tableNames: { A: {}, B: {} } };
+  return { layout: 'A', allGuests: [], seating: { A: {}, B: {} }, tableNames: { A: {}, B: {} }, groups: [], guestGroups: {} };
 }
+
+const GROUP_COLORS = ['#6b8cae','#c47fa0','#7aaa7a','#a09878','#9b7fb6','#6aacaa','#c98a50','#b0896a'];
 
 let dragGuest = null;
 let dragSource = null;
@@ -518,6 +548,8 @@ function migrateState(s) {
   if (!s.tableNames) s.tableNames = { A: {}, B: {} };
   if (!s.tableNames.A) s.tableNames.A = {};
   if (!s.tableNames.B) s.tableNames.B = {};
+  if (!s.groups) s.groups = [];
+  if (!s.guestGroups) s.guestGroups = {};
   return s;
 }
 
@@ -553,6 +585,35 @@ function findAssignment(name) {
 }
 function unassignedGuests() {
   return state.allGuests.filter(g => !findAssignment(g)).sort();
+}
+
+// ── Group helpers & actions ────────────────────────────────────────────────────
+function getGroup(name) {
+  const gid = state.guestGroups[name];
+  return gid ? state.groups.find(g => g.id === gid) : null;
+}
+function setGuestGroup(name, groupId) {
+  if (groupId) state.guestGroups[name] = groupId;
+  else delete state.guestGroups[name];
+  save(); render();
+}
+function addGroup() {
+  if (state.groups.length >= 8) return;
+  const id = 'g' + Date.now();
+  const color = GROUP_COLORS[state.groups.length % GROUP_COLORS.length];
+  state.groups.push({ id, name: 'Group ' + (state.groups.length + 1), color });
+  save(); render();
+}
+function renameGroup(groupId, newName) {
+  const g = state.groups.find(g => g.id === groupId);
+  if (g) { g.name = newName.trim() || g.name; save(); render(); }
+}
+function deleteGroup(groupId) {
+  state.groups = state.groups.filter(g => g.id !== groupId);
+  Object.keys(state.guestGroups).forEach(name => {
+    if (state.guestGroups[name] === groupId) delete state.guestGroups[name];
+  });
+  save(); render();
 }
 
 // ── Actions ───────────────────────────────────────────────────────────────────
@@ -656,9 +717,16 @@ function renderPickerList() {
     return;
   }
   guests.forEach(name => {
+    const group = getGroup(name);
     const item = document.createElement('div');
     item.className = 'picker-item';
     item.innerHTML = `<div class="pi-initial">${initials(name)}</div><span>${name}</span>`;
+    if (group) {
+      const dot = document.createElement('div');
+      dot.className = 'group-dot'; dot.style.background = group.color; dot.style.cursor = 'default';
+      dot.title = group.name;
+      item.insertBefore(dot, item.children[1]);
+    }
     item.addEventListener('click', () => {
       if (!pickerSeat) return;
       dragSource = null; // picker assign, not drag
@@ -673,9 +741,59 @@ function renderPickerList() {
 function render() {
   document.getElementById('btn-layout-a').className = 'layout-btn' + (state.layout === 'A' ? ' active' : '');
   document.getElementById('btn-layout-b').className = 'layout-btn' + (state.layout === 'B' ? ' active' : '');
+  renderGroupLegend();
   renderGuestList();
   renderTables();
   renderStats();
+}
+
+function renderGroupLegend() {
+  const legend = document.getElementById('group-legend');
+  legend.innerHTML = '';
+  state.groups.forEach(g => {
+    const pill = document.createElement('div');
+    pill.className = 'group-pill';
+    pill.style.borderColor = g.color;
+    pill.style.background = g.color + '22';
+
+    const swatch = document.createElement('span');
+    swatch.className = 'pill-swatch';
+    swatch.style.background = g.color;
+
+    const inp = document.createElement('input');
+    inp.value = g.name;
+    inp.title = 'Click to rename';
+    inp.addEventListener('click', e => e.stopPropagation());
+    inp.addEventListener('change', () => renameGroup(g.id, inp.value));
+    inp.addEventListener('keydown', e => { if (e.key === 'Enter') inp.blur(); });
+
+    const x = document.createElement('span');
+    x.className = 'pill-x'; x.textContent = '×'; x.title = 'Delete group';
+    x.addEventListener('click', e => { e.stopPropagation(); deleteGroup(g.id); });
+
+    pill.appendChild(swatch); pill.appendChild(inp); pill.appendChild(x);
+    legend.appendChild(pill);
+  });
+
+  if (state.groups.length < 8) {
+    const addBtn = document.createElement('span');
+    addBtn.className = 'group-add-btn'; addBtn.textContent = '+'; addBtn.title = 'Add group';
+    addBtn.addEventListener('click', addGroup);
+    legend.appendChild(addBtn);
+  }
+
+  // Update print legend
+  const printLegend = document.getElementById('print-group-legend');
+  printLegend.innerHTML = '';
+  state.groups.forEach(g => {
+    const pill = document.createElement('div');
+    pill.className = 'print-group-pill';
+    const sw = document.createElement('span');
+    sw.className = 'print-group-swatch'; sw.style.background = g.color;
+    pill.appendChild(sw);
+    pill.appendChild(document.createTextNode(g.name));
+    printLegend.appendChild(pill);
+  });
 }
 
 function renderGuestList() {
@@ -699,11 +817,22 @@ function renderGuestList() {
     chip.className = 'guest-chip' + (assigned ? ' assigned' : '');
     chip.draggable = true;
 
+    const group = getGroup(name);
+    const dotColor = group ? group.color : '#ddd';
+
     const ini = `<div class="guest-initial">${initials(name)}</div>`;
     const nameSpan = `<span style="flex:1;word-break:break-word">${name}</span>`;
     const badge = assigned ? `<span class="table-badge">${assignment.tableName}</span>` : '';
     const removeBtn = `<span class="remove-btn" title="Remove guest from list">×</span>`;
     chip.innerHTML = ini + nameSpan + badge + removeBtn;
+
+    // Insert group dot between avatar and name
+    const dot = document.createElement('div');
+    dot.className = 'group-dot';
+    dot.style.background = dotColor;
+    dot.title = group ? group.name : 'Assign group';
+    dot.addEventListener('click', e => { e.stopPropagation(); openGroupPicker(name, dot); });
+    chip.insertBefore(dot, chip.children[1]);
 
     chip.querySelector('.remove-btn').addEventListener('click', e => { e.stopPropagation(); removeGuest(name); });
 
@@ -723,6 +852,9 @@ function makeSeatSlot(tableId, seatIndex) {
   slot.className = 'seat-slot' + (guest ? ' occupied' : '');
 
   if (guest) {
+    const guestGroup = getGroup(guest);
+    slot.style.borderTop = '3px solid ' + (guestGroup ? guestGroup.color : '#c9a96e');
+
     slot.draggable = true;
     const nameEl = document.createElement('span');
     nameEl.className = 'seat-name-v';
@@ -809,6 +941,51 @@ function renderStats() {
   document.getElementById('stat-capacity').textContent = totalCap;
   document.getElementById('stat-remaining').textContent = Math.max(0, totalCap - seated);
 }
+
+// ── Group picker ──────────────────────────────────────────────────────────────
+let groupPickerTarget = null;
+function openGroupPicker(name, anchorEl) {
+  if (!state.groups.length) { addGroup(); return; }
+  groupPickerTarget = name;
+  const picker = document.getElementById('group-picker');
+  picker.innerHTML = '';
+
+  // "No group" option
+  const noItem = document.createElement('div');
+  noItem.className = 'gp-item';
+  const noDot = document.createElement('div');
+  noDot.className = 'gp-dot'; noDot.style.background = '#ddd';
+  noItem.appendChild(noDot);
+  noItem.appendChild(document.createTextNode('No group'));
+  noItem.addEventListener('click', e => { e.stopPropagation(); setGuestGroup(name, null); closeGroupPicker(); });
+  picker.appendChild(noItem);
+
+  state.groups.forEach(g => {
+    const item = document.createElement('div');
+    item.className = 'gp-item';
+    const dot = document.createElement('div');
+    dot.className = 'gp-dot'; dot.style.background = g.color;
+    item.appendChild(dot);
+    item.appendChild(document.createTextNode(g.name));
+    item.addEventListener('click', e => { e.stopPropagation(); setGuestGroup(name, g.id); closeGroupPicker(); });
+    picker.appendChild(item);
+  });
+
+  const rect = anchorEl.getBoundingClientRect();
+  picker.style.display = 'block';
+  const pw = picker.offsetWidth;
+  let left = rect.left;
+  if (left + pw > window.innerWidth - 8) left = window.innerWidth - pw - 8;
+  picker.style.left = left + 'px';
+  picker.style.top = (rect.bottom + 4) + 'px';
+}
+function closeGroupPicker() {
+  document.getElementById('group-picker').style.display = 'none';
+  groupPickerTarget = null;
+}
+document.addEventListener('click', e => {
+  if (!e.target.closest('#group-picker') && !e.target.classList.contains('group-dot')) closeGroupPicker();
+});
 
 render();
 </script>
